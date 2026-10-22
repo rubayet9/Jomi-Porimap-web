@@ -1,0 +1,529 @@
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* =========================================
+     SKEUOMORPHIC TOTAL STATION COLOR PALETTE
+     ========================================= */
+
+  /* Chassis Colors (Light Mode - Chassis Ivory & Surveyor Field Gear) */
+  --chassis-bg: #F4F1EA;
+  --chassis-ivory: #F7F5F0;
+  --surface-top: #FFFFFF;
+  --surface-bottom: #E8E3D7;
+  --surface-plate: #EFECE4;
+  --bevel-highlight: rgba(255, 255, 255, 0.85);
+  --bevel-shadow: rgba(0, 0, 0, 0.16);
+  --deep-shadow: rgba(0, 0, 0, 0.22);
+  --text-main: #1D2920;
+  --text-muted: #617367;
+  --border-rim: #CDC5B4;
+  --screw-head: #8C8474;
+
+  /* Surveyor Digital LCD Display */
+  --lcd-bg-top: #04180E;
+  --lcd-bg-bottom: #082819;
+  --lcd-bezel-outer: #1E3A2B;
+  --lcd-bezel-inner: #0C2016;
+  --lcd-digit-green: #4EFA8A;
+  --lcd-digit-amber: #FFD166;
+  --lcd-digit-red: #FF6E6E;
+  --lcd-digit-cyan: #64B5F6;
+  --lcd-label-mint: #81C784;
+
+  /* 3D Physical Extruded Push Buttons */
+  --btn-green-top: #388E3C;
+  --btn-green-bottom: #1B5E20;
+  --btn-green-extrusion: #0E3813;
+  --btn-green-highlight: rgba(129, 199, 132, 0.45);
+
+  --btn-blue-top: #1E88E5;
+  --btn-blue-bottom: #0D47A1;
+  --btn-blue-extrusion: #082B66;
+  --btn-blue-highlight: rgba(144, 202, 249, 0.45);
+
+  --btn-brass-top: #D4A017;
+  --btn-brass-bottom: #996515;
+  --btn-brass-extrusion: #5E3D06;
+  --btn-brass-highlight: rgba(255, 235, 59, 0.45);
+
+  --btn-danger-top: #D32F2F;
+  --btn-danger-bottom: #8B0000;
+  --btn-danger-extrusion: #4D0000;
+
+  /* Engineering Blueprint Drafting Grid */
+  --grid-bg: #F1F8E9;
+  --grid-line: rgba(46, 125, 50, 0.14);
+  --grid-line-strong: rgba(46, 125, 50, 0.32);
+}
+
+[data-theme='dark'] {
+  /* Chassis Colors (Dark Mode - Gunmetal Titanium & Carbon) */
+  --chassis-bg: #121614;
+  --chassis-ivory: #1A211D;
+  --surface-top: #26322C;
+  --surface-bottom: #141A16;
+  --surface-plate: #1E2722;
+  --bevel-highlight: rgba(255, 255, 255, 0.12);
+  --bevel-shadow: rgba(0, 0, 0, 0.55);
+  --deep-shadow: rgba(0, 0, 0, 0.7);
+  --text-main: #ECF5EE;
+  --text-muted: #95A99C;
+  --border-rim: #2E3B33;
+  --screw-head: #4A5C50;
+
+  /* LCD remains illuminated electronic */
+  --lcd-bezel-outer: #244433;
+  --lcd-bezel-inner: #07150E;
+
+  /* Engineering Blueprint Drafting Grid (Dark Blueprint) */
+  --grid-bg: #0C1510;
+  --grid-line: rgba(78, 250, 138, 0.08);
+  --grid-line-strong: rgba(78, 250, 138, 0.22);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--chassis-bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Digital Font */
+.font-digital,
+.font-mono {
+  font-family: 'Outfit', monospace;
+}
+
+/* =========================================
+   SKEUOMORPHIC CARD & BEVEL CONTAINERS
+   ========================================= */
+
+.skeuo-card {
+  position: relative;
+  background: linear-gradient(180deg, var(--surface-top) 0%, var(--surface-bottom) 100%);
+  border-radius: 20px;
+  border: 1px solid var(--border-rim);
+  border-top: 1.5px solid var(--bevel-highlight);
+  box-shadow: 
+    0 10px 24px var(--deep-shadow),
+    0 2px 4px var(--bevel-shadow),
+    inset 0 1px 1px var(--bevel-highlight),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.skeuo-plate {
+  background: var(--surface-plate);
+  border-radius: 14px;
+  border: 1px solid var(--border-rim);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.12), 0 1px 1px var(--bevel-highlight);
+}
+
+/* Corner Screws for Industrial Surveyor Aesthetic */
+.screw-rivet {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #A8A090 0%, #6E685C 100%);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5), 0 1px 1px var(--bevel-highlight);
+}
+.screw-rivet::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 1px;
+  width: 6px;
+  height: 1.5px;
+  background: #3A352D;
+  transform: rotate(45deg);
+}
+.screw-tl { top: 10px; left: 10px; }
+.screw-tr { top: 10px; right: 10px; }
+.screw-bl { bottom: 10px; left: 10px; }
+.screw-br { bottom: 10px; right: 10px; }
+
+/* =========================================
+   SURVEYOR DIGITAL LCD DISPLAY
+   ========================================= */
+
+.lcd-display-container {
+  width: 100%;
+  border-radius: 20px;
+  padding: 8px;
+  background: linear-gradient(180deg, var(--lcd-bezel-outer) 0%, var(--lcd-bezel-inner) 100%);
+  border: 2.5px solid #436B54;
+  box-shadow: 
+    0 12px 28px rgba(0, 0, 0, 0.45),
+    inset 0 2px 3px rgba(255, 255, 255, 0.2);
+}
+
+.lcd-screen {
+  position: relative;
+  width: 100%;
+  border-radius: 14px;
+  padding: 18px 20px;
+  background: linear-gradient(180deg, var(--lcd-bg-top) 0%, var(--lcd-bg-bottom) 100%);
+  border: 1px solid rgba(78, 250, 138, 0.25);
+  box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+}
+
+/* Subtle Electronic CRT Scanline Overlay */
+.lcd-screen::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 3px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.lcd-green-glow {
+  color: var(--lcd-digit-green);
+  text-shadow: 0 0 10px rgba(78, 250, 138, 0.65), 0 0 20px rgba(78, 250, 138, 0.25);
+}
+
+.lcd-amber-glow {
+  color: var(--lcd-digit-amber);
+  text-shadow: 0 0 8px rgba(255, 209, 102, 0.6);
+}
+
+.lcd-red-glow {
+  color: var(--lcd-digit-red);
+  text-shadow: 0 0 8px rgba(255, 110, 110, 0.6);
+}
+
+.lcd-cyan-glow {
+  color: var(--lcd-digit-cyan);
+  text-shadow: 0 0 8px rgba(100, 181, 246, 0.6);
+}
+
+/* =========================================
+   3D TACTILE EXTRUDED PUSH BUTTONS
+   ========================================= */
+
+.skeuo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 15px;
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.08s ease-in-out;
+  transform: translateY(0);
+}
+
+.skeuo-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.skeuo-btn-green {
+  background: linear-gradient(180deg, var(--btn-green-top) 0%, var(--btn-green-bottom) 100%);
+  border-top: 1.5px solid var(--btn-green-highlight);
+  box-shadow: 
+    0 4px 0 var(--btn-green-extrusion),
+    0 6px 12px rgba(0,0,0,0.25);
+}
+.skeuo-btn-green:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.skeuo-btn-green:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 
+    0 1px 0 var(--btn-green-extrusion),
+    0 2px 4px rgba(0,0,0,0.2);
+}
+
+.skeuo-btn-blue {
+  background: linear-gradient(180deg, var(--btn-blue-top) 0%, var(--btn-blue-bottom) 100%);
+  border-top: 1.5px solid var(--btn-blue-highlight);
+  box-shadow: 
+    0 4px 0 var(--btn-blue-extrusion),
+    0 6px 12px rgba(0,0,0,0.25);
+}
+.skeuo-btn-blue:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--btn-blue-extrusion), 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.skeuo-btn-brass {
+  background: linear-gradient(180deg, var(--btn-brass-top) 0%, var(--btn-brass-bottom) 100%);
+  border-top: 1.5px solid var(--btn-brass-highlight);
+  box-shadow: 0 4px 0 var(--btn-brass-extrusion), 0 6px 12px rgba(0,0,0,0.25);
+}
+.skeuo-btn-brass:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--btn-brass-extrusion), 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.skeuo-btn-danger {
+  background: linear-gradient(180deg, var(--btn-danger-top) 0%, var(--btn-danger-bottom) 100%);
+  box-shadow: 0 4px 0 var(--btn-danger-extrusion), 0 6px 12px rgba(0,0,0,0.25);
+}
+.skeuo-btn-danger:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--btn-danger-extrusion);
+}
+
+/* =========================================
+   MECHANICAL UNIT ROCKER SWITCH (ft ⇄ m)
+   ========================================= */
+
+.rocker-trough {
+  display: flex;
+  background: linear-gradient(180deg, #DED8CB 0%, #C8C0AF 100%);
+  border-radius: 16px;
+  padding: 5px;
+  border: 1px solid var(--border-rim);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.22);
+  gap: 5px;
+}
+
+[data-theme='dark'] .rocker-trough {
+  background: linear-gradient(180deg, #18201B 0%, #0D110F 100%);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6);
+}
+
+.rocker-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.rocker-btn.active-feet {
+  background: linear-gradient(180deg, var(--btn-green-top) 0%, var(--btn-green-bottom) 100%);
+  color: #FFFFFF;
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 3px 8px rgba(27, 94, 32, 0.45);
+}
+
+.rocker-btn.active-meters {
+  background: linear-gradient(180deg, var(--btn-blue-top) 0%, var(--btn-blue-bottom) 100%);
+  color: #FFFFFF;
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 3px 8px rgba(13, 71, 161, 0.45);
+}
+
+/* =========================================
+   ENGINEERING BLUEPRINT DRAFTING CANVAS
+   ========================================= */
+
+.drafting-canvas-frame {
+  position: relative;
+  background-color: var(--grid-bg);
+  background-image: 
+    linear-gradient(var(--grid-line-strong) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-strong) 1px, transparent 1px),
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  background-position: -1px -1px;
+  border-radius: 18px;
+  border: 2px solid var(--border-rim);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+/* =========================================
+   INPUT CONTROLS & FORM STYLES
+   ========================================= */
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 5px;
+}
+
+.skeuo-input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-rim);
+  background: var(--surface-top);
+  color: var(--text-main);
+  font-family: 'Outfit', 'Hind Siliguri', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.skeuo-input:focus {
+  border-color: #2E7D32;
+  box-shadow: 
+    0 0 0 3px rgba(46, 125, 50, 0.25),
+    inset 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* Navigation Tabs */
+.tab-bar-container {
+  display: flex;
+  background: var(--surface-plate);
+  border-radius: 18px;
+  padding: 6px;
+  border: 1px solid var(--border-rim);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  min-width: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 9px 8px;
+  border-radius: 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.tab-btn.active {
+  background: linear-gradient(180deg, var(--surface-top) 0%, var(--surface-bottom) 100%);
+  color: #2E7D32;
+  border: 1px solid var(--border-rim);
+  border-top: 1.5px solid var(--bevel-highlight);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='dark'] .tab-btn.active {
+  color: #4EFA8A;
+  border-color: #384A3F;
+}
+
+/* Modal Overlay */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: scaleUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 115, 105, 0.3);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 115, 105, 0.5);
+}
+
+/* Responsive grid layout */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 20px 80px 20px;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 12px 14px 90px 14px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+  .no-print,
+  .tab-bar-container,
+  .skeuo-btn,
+  .header-actions {
+    display: none !important;
+  }
+  .skeuo-card {
+    box-shadow: none !important;
+    border: 1px solid #000000 !important;
+  }
+}
