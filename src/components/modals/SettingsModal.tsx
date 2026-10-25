@@ -14,6 +14,8 @@ import {
   ChevronDown,
   ChevronUp,
   CheckCircle,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { AppLanguage, AppUnit, PriceUnit } from '../../types';
 import { getTranslation } from '../../lib/translations';
@@ -68,13 +70,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   const [tempApiKey, setTempApiKey] = useState(apiKey || DEFAULT_GEMINI_API_KEY);
+  const [showApiKey, setShowApiKey] = useState(false);
   const [tempPrice, setTempPrice] = useState(landPrice > 0 ? String(landPrice) : '');
   const [customKatha, setCustomKatha] = useState(String(sotangsoPerKatha));
   const [saved, setSaved] = useState(false);
 
-  // Accordion states
-  const [isManualExpanded, setIsManualExpanded] = useState(false);
-  const [isFormulasExpanded, setIsFormulasExpanded] = useState(false);
+  // Accordion states - open by default to match guideline UI
+  const [isManualExpanded, setIsManualExpanded] = useState(true);
+  const [isFormulasExpanded, setIsFormulasExpanded] = useState(true);
 
   useEffect(() => {
     setTempApiKey(apiKey || DEFAULT_GEMINI_API_KEY);
@@ -603,38 +606,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {isManualExpanded && (
                 <div
                   style={{
-                    padding: '12px 16px',
+                    padding: '14px 16px',
                     borderTop: '1px solid var(--border-rim)',
                     fontSize: '13px',
-                    lineHeight: 1.6,
+                    lineHeight: 1.7,
                     color: 'var(--text-main)',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '8px',
+                    gap: '10px',
                     background: 'var(--surface-top)',
                   }}
                 >
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <CheckCircle size={15} color="#2E7D32" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span>{getTranslation('manual_step_1', lang)}</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <CheckCircle size={15} color="#2E7D32" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span>{getTranslation('manual_step_2', lang)}</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <CheckCircle size={15} color="#2E7D32" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span>{getTranslation('manual_step_3', lang)}</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <CheckCircle size={15} color="#2E7D32" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span>{getTranslation('manual_step_4', lang)}</span>
-                  </div>
+                  <div>{getTranslation('manual_step_1', lang)}</div>
+                  <div>{getTranslation('manual_step_2', lang)}</div>
+                  <div>{getTranslation('manual_step_3', lang)}</div>
+                  <div>{getTranslation('manual_step_4', lang)}</div>
                 </div>
               )}
             </div>
 
-            {/* 7. Expandable Accordion: ভূমি পরিমাপের সূত্রাবলী */}
+            {/* 7. Expandable Accordion: ভূমি পরিমাপের সূত্রাবলি */}
             <div
               style={{
                 borderRadius: '14px',
@@ -677,33 +668,70 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {isFormulasExpanded && (
                 <div
                   style={{
-                    padding: '12px 16px',
+                    padding: '14px 16px',
                     borderTop: '1px solid var(--border-rim)',
-                    fontSize: '12px',
-                    lineHeight: 1.7,
+                    fontSize: '13px',
+                    lineHeight: 1.6,
                     color: 'var(--text-main)',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '6px',
+                    gap: '12px',
                     background: 'var(--surface-top)',
                   }}
                 >
                   <div>
-                    <strong>• আয়তাকার জমি:</strong> ক্ষেত্রফল = ((দৈর্ঘ্য ১ + দৈর্ঘ্য ২) / ২) × ((প্রস্থ ১ + প্রস্থ ২) / ২)
+                    <strong style={{ color: '#1B5E20', display: 'block', marginBottom: '2px', fontSize: '13px' }}>
+                      {lang === 'BN' ? 'আয়তক্ষেত্র' : 'Rectangle'}
+                    </strong>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '12px', lineHeight: 1.6 }}>
+                      {lang === 'BN'
+                        ? 'ক্ষেত্রফল = গড় দৈর্ঘ্য × গড় প্রস্থ = ((দৈর্ঘ্য ১ + দৈর্ঘ্য ২) / ২) × ((প্রস্থ ১ + প্রস্থ ২) / ২)'
+                        : 'Area = Avg Length × Avg Width = ((Length 1 + Length 2) / 2) × ((Width 1 + Width 2) / 2)'}
+                    </div>
                   </div>
+
                   <div>
-                    <strong>• ত্রিভুজাকার জমি (হেরন সূত্র):</strong> s = (a+b+c)/২, ক্ষেত্রফল = √(s(s-a)(s-b)(s-c))
+                    <strong style={{ color: '#1B5E20', display: 'block', marginBottom: '2px', fontSize: '13px' }}>
+                      {lang === 'BN' ? 'ত্রিভুজ' : 'Triangle'}
+                    </strong>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '12px', lineHeight: 1.6 }}>
+                      {lang === 'BN'
+                        ? 'হেরন্সের সূত্র: s = (a+b+c)/২, ক্ষেত্রফল = √(s(s-a)(s-b)(s-c))'
+                        : "Heron's formula: s = (a+b+c)/2, Area = √(s(s-a)(s-b)(s-c))"}
+                    </div>
                   </div>
+
                   <div>
-                    <strong>• অনিয়মিত চতুর্ভুজ:</strong> কর্ণ দিয়ে ২টি ত্রিভুজে বিভক্ত করে হেরন সূত্রে সঠিক হিসাব।
+                    <strong style={{ color: '#1B5E20', display: 'block', marginBottom: '2px', fontSize: '13px' }}>
+                      {lang === 'BN' ? 'পঞ্চভুজ' : 'Pentagon'}
+                    </strong>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '12px', lineHeight: 1.6 }}>
+                      {lang === 'BN'
+                        ? 'ক্ষেত্রফল = ১.৭২০৪৮ × গড় বাহু² (পঞ্চভুজ আনুমানিক হিসাব)'
+                        : 'Area = 1.72048 × Avg Side² (Approximate pentagon)'}
+                    </div>
                   </div>
-                  <div style={{ marginTop: '4px', borderTop: '1px dashed var(--border-rim)', paddingTop: '6px' }}>
-                    <strong>স্ট্যান্ডার্ড রূপান্তর:</strong>
-                    <div>• ১ শতাংশ / শতক = ৪৩৫.৬০ বর্গফুট = ৪০.৪৬৭ বর্গমিটার</div>
-                    <div>• ১ কাঠা = ৭২০ বর্গফুট ≈ ১.৬৫ শতাংশ (বা ২.৭০ শতক অঞ্চলভেদে)</div>
-                    <div>• ১ বিঘা = ২০ কাঠা = ১৪,৪০০ বর্গফুট ≈ ৩৩.০৫৮ শতাংশ</div>
-                    <div>• ১ একর = ১০০ শতক = ৪৩,৫৬০ বর্গফুট</div>
-                    <div>• ১ ছটাক = ৪৫ বর্গফুট (১৬ ছটাক = ১ কাঠা)</div>
+
+                  <div>
+                    <strong style={{ color: '#1B5E20', display: 'block', marginBottom: '2px', fontSize: '13px' }}>
+                      {lang === 'BN' ? 'ষড়ভুজ' : 'Hexagon'}
+                    </strong>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '12px', lineHeight: 1.6 }}>
+                      {lang === 'BN'
+                        ? 'ক্ষেত্রফল = ২.৫৯৮০৮ × বাহু² (সুষম ষড়ভুজ)'
+                        : 'Area = 2.59808 × Side² (Regular hexagon)'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <strong style={{ color: '#1B5E20', display: 'block', marginBottom: '2px', fontSize: '13px' }}>
+                      {lang === 'BN' ? 'কাস্টম ড্রয়িং' : 'Custom Drawing'}
+                    </strong>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '12px', lineHeight: 1.6 }}>
+                      {lang === 'BN'
+                        ? 'শু-লেস সূত্র: ক্ষেত্রফল = ০.৫ × |∑(x_i y_{i+1} - x_{i+1} y_i)|'
+                        : 'Shoelace formula: Area = 0.5 × |∑(x_i y_{i+1} - x_{i+1} y_i)|'}
+                    </div>
                   </div>
                 </div>
               )}
@@ -737,7 +765,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span>{getTranslation('about_us', lang)}</span>
             </button>
 
-            {/* 9. Google Gemini API Key Input */}
+            {/* 9. Google Gemini API Key Input (Hidden/Masked with toggle) */}
             <div
               style={{
                 background: 'var(--surface-plate)',
@@ -748,29 +776,93 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             >
               <div
                 style={{
-                  fontSize: '13px',
-                  fontWeight: 800,
-                  color: 'var(--text-main)',
-                  marginBottom: '4px',
                   display: 'flex',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
-                  gap: '6px',
+                  marginBottom: '4px',
                 }}
               >
-                <Key size={14} color="#2E7D32" />
-                <span>{getTranslation('gemini_key', lang)}</span>
+                <div
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 800,
+                    color: 'var(--text-main)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <Key size={14} color="#2E7D32" />
+                  <span>{getTranslation('gemini_key', lang)}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    setShowApiKey(!showApiKey);
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#2E7D32',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '2px 6px',
+                    borderRadius: '6px',
+                  }}
+                >
+                  {showApiKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                  <span>{showApiKey ? (lang === 'BN' ? 'লুকান' : 'Hide') : (lang === 'BN' ? 'দেখুন' : 'Show')}</span>
+                </button>
               </div>
+
               <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                 {getTranslation('gemini_key_hint', lang)}
               </p>
-              <input
-                type="text"
-                value={tempApiKey}
-                onChange={(e) => setTempApiKey(e.target.value)}
-                className="skeuo-input"
-                placeholder="Google Gemini API Key..."
-                style={{ fontSize: '12px', fontFamily: 'monospace' }}
-              />
+
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  value={tempApiKey}
+                  onChange={(e) => setTempApiKey(e.target.value)}
+                  className="skeuo-input"
+                  placeholder="••••••••••••••••••••••••"
+                  style={{
+                    fontSize: '12px',
+                    fontFamily: showApiKey ? 'monospace' : 'inherit',
+                    letterSpacing: showApiKey ? 'normal' : '2px',
+                    paddingRight: '38px',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    setShowApiKey(!showApiKey);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
             {/* 10. Sound Toggle */}

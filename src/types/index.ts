@@ -90,4 +90,5 @@ export interface ChatMessage {
   sender: 'USER' | 'AI';
   text: string;
   timestamp: number;
+  image?: string;
 }

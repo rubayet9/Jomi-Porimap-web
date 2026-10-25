@@ -1,22 +1,50 @@
 import { ChatMessage } from '../types';
 
 export const SYSTEM_PROMPT = `
-You are "Digital Amin" (ডিজিটাল আমিন), a world-class legal and mathematical Land Measurement AI Assistant specializing in Bangladesh and South Asian land laws, survey systems, and mathematical calculations.
+You are "Digital Amin" (ডিজিটাল আমিন), a world-class legal and mathematical Land Measurement AI Assistant and expert Bengali Land Records (খতিয়ান, পর্চা, মৌজা নকশা, নামজারি) Analyst specializing in Bangladesh land survey and property laws.
 
-Capabilities & Rules:
-1. Languages: You must seamlessly understand and answer in Bengali (বাংলা), English, and Banglish (Bengali written in English letters).
-2. Domain Expertise:
-   - Land conversions: Sq. Feet, Sq. Meters, Sotangso/Decimal, Katha, Bigha, Acre, Hectare, Kani, Gonda, Chhatak.
-   - Survey formulas: Heron's formula, average method vs triangulation, shoelace formula for irregular land.
-   - Land records & law: CS, SA, RS, BS/City Survey, Namjari/Mutation (নামজারি/খারিজ), DCR, Porcha, Khatian, deeds (হেবা, সাফ-কবলা, দানপত্র, ওসিয়তনামা).
-3. Tone: Helpful, highly respectful, mathematically rigorous, and clear.
-4. Structure: Always present calculations with step-by-step mathematical breakdown. Use Markdown bullet points and bold headers for clarity.
+Language & Communication Protocol (ভাষা ও লিপি নির্দেশনা):
+1. Complete Comprehension of Bangla & Banglish:
+   - You MUST 100% understand queries written in:
+     * Standard Bengali Script (যেমন: "১ শতাংশে কত বর্গফুট?", "নামজারি করতে কি কি লাগে?")
+     * Banglish / Romanized Bengali (যেমন: "amar jomir hisab ber kore dao", "1 sotangso te koto sqft", "khotian er hisab kivabe korbo", "namjari korte ki ki kagoj lage", "akabaka 4 bahur jomi kivabe mapbo", "koto shotangsho hobe").
+     * English.
+2. Response Language:
+   - By default, answer in clear, beautiful, and authentic Bengali (সহজ, প্রাঞ্জল ও প্রফেশনাল বাংলা ভাষায় উত্তর দিন)।
+   - If the user explicitly asks for response in Banglish (e.g. "banglish e bolo", "english alphabet diye lekho"), or if they speak exclusively in casual Banglish and ask for Roman script, you can reply in natural, easy-to-read Banglish!
+   - Always present mathematical formulas and step-by-step numbers with utmost clarity and Markdown formatting.
+
+Core Specializations:
+1. Khatian & Porcha Image & Text Analysis (খতিয়ানের ছবি বা তথ্য থেকে হিস্যা ও জমি নিরূপণ):
+   When the user provides a photo, text, or query about a Khatian (CS, SA, RS, BS, সিটি জরিপ, বা ই-নামজারি পর্চা):
+   - Thoroughly read and extract:
+     * খতিয়ানের ধরন (CS, SA, RS, BS, Namjari etc.)
+     * জেলা, উপজেলা/থানা, মৌজা ও জে.এল. নম্বর (J.L. No)
+     * খতিয়ান নম্বর ও দাগ নম্বরসমূহ (Khatian & Daag / Plot Nos)
+     * খতিয়ানের মোট জমির পরিমাণ (সাধারণত একরে বা একর-শতকে থাকে, যেমন: ১.০৫ একর বা ০.৭০ একর)
+     * অংশীদারদের তালিকা ও তাদের উল্লেখিত অংশ/হিস্যা (১৬ আনা আনা-গণ্ডা-কড়া-ক্রান্তি অথবা বিএস দশমিক হিস্যা যেমন: ০.২৫০, ০.১২৫, ০.০০৭)
+   - Perform precise mathematical calculations for each owner:
+     * ব্যক্তির জমি (একর) = মোট জমি (একর) × ব্যক্তির অংশ
+     * ব্যক্তির জমি (শতাংশ / শতক) = ব্যক্তির জমি (একর) × ১০০
+     * ব্যক্তির জমি (কাঠা) = শতাংশ ÷ ১.৬৫২৮৯ (আদর্শ মান)
+     * ব্যক্তির জমি (বর্গফুট) = শতাংশ × ৪৩৫.৬০
+   - Present results in a clear Markdown Table:
+     | ক্রম | অংশীদারের নাম | খতিয়ানের অংশ (হিস্যা) | প্রাপ্ত জমি (শতাংশ/শতক) | কাঠা | বর্গফুট |
+   - Explain the step-by-step calculation formula clearly.
+
+2. General Land Law & Surveying:
+   - Provide guidance on land deeds (সাফ-কবলা, হেবা, দানপত্র, বণ্টননামা), e-namjari (খারিজ), DCR, mutation, land tax (খাজনা দাখিলা).
+   - Survey math: Heron's formula, Triangulation, Shoelace formula for irregular plots.
+   - Standard units: 1 Sotangso = 435.60 Sq.Ft = 40.467 Sq.M; 1 Katha = 720 Sq.Ft ≈ 1.65 Sotangso; 1 Bigha = 20 Katha = 14,400 Sq.Ft; 1 Acre = 100 Sotangso = 43,560 Sq.Ft.
 `;
 
-// Offline Expert Knowledge Base for instant high-quality responses
+// Offline Expert Knowledge Base for instant high-quality responses (With Bengali & Banglish keywords)
 const KNOWLEDGE_RESPONSES: { keywords: string[]; answerBN: string; answerEN: string }[] = [
   {
-    keywords: ['১ শতাংশ', 'শতাংশ', 'বর্গফুট', 'বর্গমিটার', '1 sotangso', 'decimal', 'sq feet', 'sq meter'],
+    keywords: [
+      '১ শতাংশ', 'শতাংশ', 'শতক', 'বর্গফুট', 'বর্গমিটার', '1 sotangso', 'sotangso', 'shatangsho', 'shotangsho',
+      'shotok', 'shatak', 'decimal', 'koto square feet', 'koto sqft', 'koto square foot', 'koto foot', 'sq feet', 'sq meter'
+    ],
     answerBN: `### ১ শতাংশ বা শতক (Decimal) ভূমির সঠিক পরিমাপ:
 
 * **বর্গফুটে (Square Feet):** ১ শতাংশ = **৪৩৫.৬০ বর্গফুট**।
@@ -40,7 +68,42 @@ const KNOWLEDGE_RESPONSES: { keywords: string[]; answerBN: string; answerEN: str
 3. **1 Acre** = 100 Sotangso = 43,560 Sq.Ft ≈ **3.025 Bighas**.`
   },
   {
-    keywords: ['আঁকাবাঁকা', '৪ বাহু', 'চার বাহু', 'অনিয়মিত', 'irregular', 'quadrilateral'],
+    keywords: [
+      'খতিয়ান', 'খতিয়ান', 'পর্চা', 'হিস্যা', 'অংশ', 'khotian', 'khatian', 'porcha', 'porca',
+      'khotiyan', 'hissya', 'hissa', 'share', 'ongsho', 'kivabe hisab kore'
+    ],
+    answerBN: `### খতিয়ান বা পর্চা থেকে নির্দিষ্ট ব্যক্তির জমির হিসাব বের করার নিয়ম:
+
+খতিয়ান থেকে যেকোনো অংশীদারের জমি বের করতে দুটি জিনিস প্রয়োজন:
+1. **খতিয়ানের মোট জমি (একর বা শতাংশে):** খতিয়ানের দাগের নিচের সারিতে মোট জমি দেওয়া থাকে (যেমন: ১.০০ একর বা ০.৫০ একর)।
+2. **ব্যক্তির অংশ (হিস্যা):** ব্যক্তির নামের পাশে বিএস খতিয়ানে দশমিক অংশ (যেমন: ০.০৫০) অথবা সিএস/এসএ/আরএস খতিয়ানে ১৬ আনার অংশ (যেমন: ৪ আনা) থাকে।
+
+**হিসাবের সূত্র:**
+$$\\text{ব্যক্তির প্রাপ্য জমি (একর)} = \\text{মোট জমি (একর)} \\times \\text{ব্যক্তির অংশ}$$
+$$\\text{ব্যক্তির প্রাপ্য জমি (শতাংশ/শতক)} = \\text{মোট জমি (একর)} \\times \\text{ব্যক্তির অংশ} \\times ১০০$$
+
+**উদাহরণ:**
+মোট জমি = ১.০০ একর, ব্যক্তির অংশ = ০.০০৭
+তাহলে ব্যক্তির জমি = $১.০০ \\times ০.০০৭ \\times ১০০ = ০.৭০$ শতক বা শতাংশ।
+কাঠা = $০.৭০ \\div ১.৬৫২৮৯ = ০.৪২$ কাঠা।
+
+💡 *আমাদের অ্যাপের **"খতিয়ান"** ট্যাবে গিয়ে সরাসরি এই দুটি মান বসালেই সাথে সাথে শতক, কাঠা ও টাকার দর পেয়ে যাবেন।*`,
+    answerEN: `### How to Calculate Individual Land Share from Khatian:
+
+You need 2 inputs:
+1. **Total Land in Khatian (in Acre):** Listed at the bottom of the plot table (e.g. 1.00 Acre).
+2. **Person's Share (Hissya):** In BS Khatian as decimal (e.g. 0.050) or in CS/SA/RS as 16 Ana fraction.
+
+**Formula:**
+* Allocated Acre = Total Land (Acre) × Share
+* Allocated Sotangso = Total Land (Acre) × Share × 100
+
+Use our **Khatian Tab** to calculate this automatically in one click!`
+  },
+  {
+    keywords: [
+      'আঁকাবাঁকা', '৪ বাহু', 'চার বাহু', 'অনিয়মিত', 'akabaka', 'char bahu', '4 bahu', 'oniyomito', 'irregular', 'quadrilateral', 'kivabe mapbo'
+    ],
     answerBN: `### আঁকাবাঁকা বা ৪ বাহুর জমি মাপার নির্ভুল নিয়ম:
 
 সাধারণত অনেকে উত্তর-দক্ষিণ ও পূর্ব-পশ্চিমের বাহুগুলোর গড় নিয়ে গুণ করেন:
@@ -149,7 +212,8 @@ export async function askDigitalAmin(
   query: string,
   history: ChatMessage[],
   apiKey?: string,
-  lang: 'BN' | 'EN' = 'BN'
+  lang: 'BN' | 'EN' = 'BN',
+  imageBase64?: string
 ): Promise<string> {
   const cleanQuery = query.trim().toLowerCase();
 
@@ -158,39 +222,101 @@ export async function askDigitalAmin(
 
   if (activeKey) {
     try {
+      // Build user parts for multimodal vision or text
+      const userParts: any[] = [];
+
+      if (imageBase64) {
+        const match = imageBase64.match(/^data:([^;]+);base64,(.+)$/);
+        const mimeType = match ? match[1] : 'image/jpeg';
+        const rawBase64 = match ? match[2] : imageBase64;
+        userParts.push({
+          inlineData: {
+            mimeType,
+            data: rawBase64,
+          },
+        });
+      }
+
+      userParts.push({
+        text:
+          query.trim() ||
+          (lang === 'BN'
+            ? 'অনুগ্রহ করে এই খতিয়ান/পর্চার ছবিটি ভালো করে পড়ে বিশ্লেষণ করুন। জেলা, থানা/উপজেলা, মৌজা, খতিয়ান নং, দাগ নং, খতিয়ানের মোট জমি এবং প্রত্যেক অংশীদারের হিস্যা অনুযায়ী কার কত শতাংশ ও কাঠা জমি প্রাপ্য তা টেবিল আকারে বিস্তারিত হিসাব করে দিন।'
+            : 'Please thoroughly inspect and analyze this Khatian/Porcha document image. Extract District, Upazila, Mouza, Khatian No, Daag/Plot Nos, Total Land, and calculate each owner’s share in Sotangso, Katha, and Sq.Ft in a clear Markdown Table with step-by-step math.'),
+      });
+
       const contents = [
         { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
         {
           role: 'model',
           parts: [
             {
-              text: 'আমি ডিজিটাল আমিন। জমি পরিমাপ, জরিপ সূত্র, খতিয়ান বা ভূমি আইন বিষয়ক যেকোনো বিষয়ে প্রশ্ন করুন।'
+              text: 'আমি ডিজিটাল আমিন। খতিয়ানের ছবি বিশ্লেষণ, জমি পরিমাপ, জরিপ সূত্র বা ভূমি আইন বিষয়ক যেকোনো বিষয়ে সাহায্য করতে প্রস্তুত।'
             }
           ]
         },
-        ...history.slice(-8).map((msg) => ({
+        ...history.slice(-6).map((msg) => ({
           role: msg.sender === 'USER' ? 'user' : 'model',
           parts: [{ text: msg.text }]
         })),
-        { role: 'user', parts: [{ text: query }] }
+        { role: 'user', parts: userParts }
       ];
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents })
-        }
-      );
+      // Try multiple models in case of regional or version availability
+      const candidateModels = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+      for (const modelName of candidateModels) {
+        try {
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents })
+            }
+          );
 
-      if (res.ok) {
-        const data = await res.json();
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (reply) return reply;
+          if (res.ok) {
+            const data = await res.json();
+            const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (reply) return reply;
+          }
+        } catch {
+          // try next model
+        }
       }
     } catch {
       // Fallback to internal knowledge base
+    }
+  }
+
+  // If an image was submitted and live Gemini API is unreachable / no key
+  if (imageBase64) {
+    if (lang === 'BN') {
+      return `### 📜 খতিয়ানের ছবি প্রাপ্ত হয়েছে (Khatian Image Received)
+
+আপনার খতিয়ান/পর্চার ছবিটি সফলভাবে যুক্ত হয়েছে! খতিয়ান থেকে নির্দিষ্ট ব্যক্তির জমির হিসাব বের করার সরকারি পদ্ধতি:
+
+1. **খতিয়ানের মোট জমি বের করুন:** খতিয়ানের নিচের কলামে বা দাগের সারিতে মোট জমি (সাধারণত একরে বা একর-শতকে) লেখা থাকে। যেমন: **১.০৫ একর** বা **০.৫০ একর**।
+2. **মালিকের হিস্যা (অংশ) দেখুন:** মালিক বা রায়তের নামের পাশে 'অংশ' কলামে তার অংশ লেখা থাকে (যেমন: **০.২৫০**, **০.০৫০** অথবা আনা-গণ্ডা)।
+3. **হিসাবের গাণিতিক সূত্র:**
+   $$\\text{ব্যক্তির প্রাপ্ত জমি (শতক)} = \\text{মোট জমি (একর)} \\times \\text{ব্যক্তির অংশ} \\times ১০০$$
+   $$\\text{প্রাপ্ত জমি (কাঠা)} = \\frac{\\text{শতক}}{১.৬৫২৮৯}$$
+
+💡 **টিপস:** আপনি সরাসরি আমাদের অ্যাপের **"খতিয়ান"** ট্যাবে গিয়ে এই দুটি সংখ্যা (মোট জমি ও অংশ) ইনপুট দিলে সাথে সাথে শতক, কাঠা, বিঘা এবং মোট বাজার মূল্য হিসাব হয়ে যাবে!
+
+*(সরাসরি ছবি থেকে স্বয়ংক্রিয় OCR পড়ার জন্য সেটিংস মেনুতে আপনার সক্রিয় Gemini API Key নিশ্চিত করুন)।*`;
+    } else {
+      return `### 📜 Khatian Document Image Received
+
+Your Khatian image has been attached! Here is how to calculate land allocation:
+
+1. **Locate Total Land:** Check the bottom of the Khatian for Total Land (usually in Acres, e.g. **1.05 Acre** or **0.50 Acre**).
+2. **Locate Owner's Share:** Find the owner's name and their share (e.g. **0.250**, **0.050** or 16-Ana fraction).
+3. **Calculation Formula:**
+   $$\\text{Allocated Sotangso} = \\text{Total Land (Acre)} \\times \\text{Share} \\times 100$$
+   $$\\text{Allocated Katha} = \\frac{\\text{Sotangso}}{1.65289}$$
+
+*(For direct automated OCR text extraction from document photos, ensure an active Gemini API key is configured in Settings).*`;
     }
   }
 

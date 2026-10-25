@@ -34,18 +34,18 @@ export const SkeuoUnitRocker: React.FC<SkeuoUnitRockerProps> = ({
         title={lang === 'BN' ? 'ফুট এককে রূপান্তর' : 'Switch to Feet'}
       >
         <span>📐</span>
-        <span>{lang === 'BN' ? 'ফুট (FEET)' : 'FEET (FT)'}</span>
+        <span>{lang === 'BN' ? 'ফুট (FT)' : 'FEET (FT)'}</span>
       </button>
 
       {/* Meter Toggle */}
       <button
         type="button"
         onClick={() => handleSelect('METERS')}
-        className={`rocker-btn ${!isFeet ? 'active-meters' : ''}`}
+        className={`rocker-btn ${!isFeet ? 'active-feet' : ''}`}
         title={lang === 'BN' ? 'মিটার এককে রূপান্তর' : 'Switch to Meters'}
       >
-        <span>📏</span>
-        <span>{lang === 'BN' ? 'মিটার (METERS)' : 'METERS (M)'}</span>
+        <span>✏️</span>
+        <span>{lang === 'BN' ? 'মিটার (M)' : 'METER (M)'}</span>
       </button>
     </div>
   );

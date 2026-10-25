@@ -43,6 +43,9 @@ import { AboutDeveloperModal } from './components/modals/AboutDeveloperModal';
 import { SettingsModal } from './components/modals/SettingsModal';
 import { UserManualModal } from './components/modals/UserManualModal';
 import { CalculationResultModal } from './components/modals/CalculationResultModal';
+import { AuthModal } from './components/auth/AuthModal';
+import { UserProfileModal } from './components/auth/UserProfileModal';
+import { auth, onAuthStateChanged, FirebaseUser } from './lib/firebase';
 
 import confetti from 'canvas-confetti';
 import { Calculator, Sparkles, BookOpen, AlertCircle } from 'lucide-react';
@@ -123,6 +126,40 @@ export const App: React.FC = () => {
   const [isDeveloperOpen, setIsDeveloperOpen] = useState(false);
   const [isManualOpen, setIsManualOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // User Auth State (Firebase real user only, demo login removed)
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(() => auth.currentUser);
+
+  // Listen to Firebase Auth state and load user's profile history
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      if (user) {
+        const userKey = `jomi_history_${user.uid}`;
+        const userSaved = localStorage.getItem(userKey);
+        if (userSaved) {
+          try {
+            setHistoryList(JSON.parse(userSaved));
+          } catch {
+            setHistoryList([]);
+          }
+        } else {
+          // If first login, migrate existing device history to profile
+          const generalSaved = localStorage.getItem('jomi_history');
+          if (generalSaved) {
+            try {
+              const parsed = JSON.parse(generalSaved);
+              setHistoryList(parsed);
+              localStorage.setItem(userKey, generalSaved);
+            } catch {}
+          }
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Sync theme with HTML root attribute
   useEffect(() => {
@@ -156,8 +193,11 @@ export const App: React.FC = () => {
   }, [priceUnit]);
 
   useEffect(() => {
+    if (currentUser?.uid) {
+      localStorage.setItem(`jomi_history_${currentUser.uid}`, JSON.stringify(historyList));
+    }
     localStorage.setItem('jomi_history', JSON.stringify(historyList));
-  }, [historyList]);
+  }, [historyList, currentUser]);
 
   // Smart Unit Switching (Converts existing values seamlessly!)
   const handleUnitChange = (newUnit: AppUnit) => {
@@ -443,6 +483,9 @@ export const App: React.FC = () => {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenDeveloper={() => setIsDeveloperOpen(true)}
         onOpenManual={() => setIsManualOpen(true)}
+        currentUser={currentUser}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
       />
 
       {/* 2. Top Navigation Tabs */}
@@ -634,10 +677,12 @@ export const App: React.FC = () => {
         <KhatianTab
           lang={lang}
           landPrice={landPrice}
+          priceUnit={priceUnit}
           sotangsoPerKatha={sotangsoPerKatha}
-          onSaveHistory={(totalLandVal, pCount, desc) => {
-            const totalSotangso = totalLandVal * 100.0;
-            const computedRes = computeLandMetrics(totalSotangso * 435.6, sotangsoPerKatha);
+          unit={unit}
+          onUnitChange={handleUnitChange}
+          onSaveHistory={(sotangsoVal, desc) => {
+            const computedRes = computeLandMetrics(sotangsoVal * 435.6, sotangsoPerKatha);
             const historyItem: CalculationHistoryItem = {
               id: String(Date.now()),
               timestamp: Date.now(),
@@ -649,13 +694,13 @@ export const App: React.FC = () => {
               }),
               tabType: 'KHATIAN',
               shapeType: 'Khatian',
-              unit: 'FEET',
+              unit: unit,
               inputsDesc: desc,
-              sqFeet: totalSotangso * 435.6,
-              sqMeters: (totalSotangso * 435.6) / 10.7639,
-              sotangso: totalSotangso,
-              katha: totalSotangso / sotangsoPerKatha,
-              bigha: (totalSotangso * 435.6) / 14400.0,
+              sqFeet: sotangsoVal * 435.6,
+              sqMeters: (sotangsoVal * 435.6) / 10.7639,
+              sotangso: sotangsoVal,
+              katha: sotangsoVal / sotangsoPerKatha,
+              bigha: (sotangsoVal * 435.6) / 14400.0,
               totalPrice: computeTotalPrice(computedRes, landPrice, priceUnit),
             };
             setHistoryList((prev) => [historyItem, ...prev]);
@@ -734,6 +779,26 @@ export const App: React.FC = () => {
         isOpen={isManualOpen}
         onClose={() => setIsManualOpen(false)}
         lang={lang}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        lang={lang}
+        onSuccess={() => setIsAuthModalOpen(false)}
+      />
+
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        lang={lang}
+        currentUser={currentUser}
+        historyList={historyList}
+        onDeleteHistoryItem={(id) => setHistoryList((prev) => prev.filter((item) => item.id !== id))}
+        onClearHistory={() => setHistoryList([])}
+        onLogout={() => {
+          setCurrentUser(null);
+        }}
       />
     </div>
   );
