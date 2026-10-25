@@ -34,14 +34,9 @@ export const ShapeSelector: React.FC<ShapeSelectorProps> = ({
 }) => {
   const shapes: ShapeItem[] = [
     { key: 'RECTANGLE', icon: <RectangleHorizontal size={18} />, labelKey: 'shape_rectangle' },
-    { key: 'SQUARE', icon: <Square size={18} />, labelKey: 'shape_square' },
     { key: 'TRIANGLE', icon: <Triangle size={18} />, labelKey: 'shape_triangle' },
-    { key: 'RHOMBUS', icon: <Diamond size={18} />, labelKey: 'shape_rhombus' },
-    { key: 'PARALLELOGRAM', icon: <Spline size={18} />, labelKey: 'shape_parallelogram' },
-    { key: 'TRAPEZIUM', icon: <Shapes size={18} />, labelKey: 'shape_trapezium' },
     { key: 'PENTAGON', icon: <Pentagon size={18} />, labelKey: 'shape_pentagon' },
     { key: 'HEXAGON', icon: <Hexagon size={18} />, labelKey: 'shape_hexagon' },
-    { key: 'CUBE', icon: <Box size={18} />, labelKey: 'shape_cube' },
     { key: 'QUADRILATERAL', icon: <Shapes size={18} />, labelKey: 'shape_quadrilateral' },
     { key: 'FREEFORM', icon: <PencilRuler size={18} />, labelKey: 'shape_freeform' },
   ];

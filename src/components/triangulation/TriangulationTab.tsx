@@ -18,6 +18,7 @@ interface TriangulationTabProps {
   lang: AppLanguage;
   sotangsoPerKatha: number;
   onSaveHistory: (result: CalculationResult, desc: string) => void;
+  onShowResultModal?: (result: CalculationResult) => void;
 }
 
 export const TriangulationTab: React.FC<TriangulationTabProps> = ({
@@ -28,6 +29,7 @@ export const TriangulationTab: React.FC<TriangulationTabProps> = ({
   lang,
   sotangsoPerKatha,
   onSaveHistory,
+  onShowResultModal,
 }) => {
   const unitLabel = unit === 'FEET' ? 'ft' : 'm';
 
@@ -103,6 +105,9 @@ export const TriangulationTab: React.FC<TriangulationTabProps> = ({
 
     const desc = `${triangles.length} Triangles (Heron Triangulation)`;
     onSaveHistory(currentResult, desc);
+    if (onShowResultModal) {
+      onShowResultModal(currentResult);
+    }
   };
 
   return (

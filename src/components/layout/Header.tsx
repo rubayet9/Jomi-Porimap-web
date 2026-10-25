@@ -199,6 +199,8 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Developer Info */}
         <button
           type="button"
+          id="dev-btn"
+          aria-label={getTranslation('developer_info', lang)}
           onClick={() => {
             sound.playClick();
             onOpenDeveloper();
@@ -209,17 +211,19 @@ export const Header: React.FC<HeaderProps> = ({
             border: 'none',
             color: 'var(--text-muted)',
             cursor: 'pointer',
-            padding: '4px',
+            padding: '6px',
             display: 'flex',
             alignItems: 'center',
           }}
         >
-          <User size={16} />
+          <User size={17} />
         </button>
 
         {/* Settings */}
         <button
           type="button"
+          id="settings-btn"
+          aria-label={getTranslation('menu_settings', lang)}
           onClick={() => {
             sound.playClick();
             onOpenSettings();
@@ -230,12 +234,12 @@ export const Header: React.FC<HeaderProps> = ({
             border: 'none',
             color: 'var(--text-muted)',
             cursor: 'pointer',
-            padding: '4px',
+            padding: '6px',
             display: 'flex',
             alignItems: 'center',
           }}
         >
-          <Settings size={16} />
+          <Settings size={17} />
         </button>
       </div>
     </header>

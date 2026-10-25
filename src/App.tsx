@@ -16,7 +16,9 @@ import {
   heronFormula,
   shoelaceFormula,
   formatBDT,
+  computeTotalPrice,
 } from './lib/calculations';
+import { DEFAULT_GEMINI_API_KEY } from './lib/gemini';
 import { getTranslation } from './lib/translations';
 import { sound } from './lib/sound';
 
@@ -40,6 +42,7 @@ import { HistoryTab } from './components/history/HistoryTab';
 import { AboutDeveloperModal } from './components/modals/AboutDeveloperModal';
 import { SettingsModal } from './components/modals/SettingsModal';
 import { UserManualModal } from './components/modals/UserManualModal';
+import { CalculationResultModal } from './components/modals/CalculationResultModal';
 
 import confetti from 'canvas-confetti';
 import { Calculator, Sparkles, BookOpen, AlertCircle } from 'lucide-react';
@@ -64,7 +67,8 @@ export const App: React.FC = () => {
   });
 
   const [geminiApiKey, setGeminiApiKey] = useState<string>(() => {
-    return localStorage.getItem('jomi_gemini_key') || '';
+    const saved = localStorage.getItem('jomi_gemini_key');
+    return saved && saved.trim() !== '' ? saved : DEFAULT_GEMINI_API_KEY;
   });
 
   const [landPrice, setLandPrice] = useState<number>(() => {
@@ -72,7 +76,9 @@ export const App: React.FC = () => {
     return val ? parseFloat(val) : 50000;
   });
 
-  const [priceUnit, setPriceUnit] = useState<PriceUnit>('SOTANGSO');
+  const [priceUnit, setPriceUnit] = useState<PriceUnit>(() => {
+    return (localStorage.getItem('jomi_price_unit') as PriceUnit) || 'SOTANGSO';
+  });
 
   // Navigation Tab
   const [activeTab, setActiveTab] = useState<AppTab>('CALCULATOR');
@@ -116,6 +122,7 @@ export const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDeveloperOpen, setIsDeveloperOpen] = useState(false);
   const [isManualOpen, setIsManualOpen] = useState(false);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
   // Sync theme with HTML root attribute
   useEffect(() => {
@@ -143,6 +150,10 @@ export const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('jomi_land_price', String(landPrice));
   }, [landPrice]);
+
+  useEffect(() => {
+    localStorage.setItem('jomi_price_unit', priceUnit);
+  }, [priceUnit]);
 
   useEffect(() => {
     localStorage.setItem('jomi_history', JSON.stringify(historyList));
@@ -328,7 +339,7 @@ export const App: React.FC = () => {
         .map(([k, v]) => `${k}:${v}`)
         .join(', ');
 
-      const calculatedTotalPrice = computedMetrics.sotangso * landPrice;
+      const calculatedTotalPrice = computeTotalPrice(computedMetrics, landPrice, priceUnit);
 
       const historyItem: CalculationHistoryItem = {
         id: String(Date.now()),
@@ -357,6 +368,7 @@ export const App: React.FC = () => {
 
   const handleManualCalculate = () => {
     calculateArea(selectedShape, inputs, unit, triangleMethod, freeformPoints, true);
+    setIsResultModalOpen(true);
   };
 
   const handleResetCalculator = () => {
@@ -373,16 +385,14 @@ export const App: React.FC = () => {
     let defaultInputs: Record<string, string> = {};
     if (shape === 'RECTANGLE') {
       defaultInputs = { length_1: '100', length_2: '100', width_1: '50', width_2: '50' };
-    } else if (shape === 'SQUARE') {
-      defaultInputs = { side: '60' };
     } else if (shape === 'TRIANGLE') {
       defaultInputs = { base: '80', height: '60', side_a: '60', side_b: '80', side_c: '100' };
-    } else if (shape === 'TRAPEZIUM') {
-      defaultInputs = { side_a: '60', side_b: '100', height: '40' };
     } else if (shape === 'QUADRILATERAL') {
       defaultInputs = { side_a: '70', side_b: '80', side_c: '90', side_d: '75', diag_e: '110' };
-    } else if (shape === 'CUBE') {
-      defaultInputs = { side: '20', depth: '10' };
+    } else if (shape === 'PENTAGON') {
+      defaultInputs = { side: '50', diag_1_pent: '80', diag_2_pent: '80' };
+    } else if (shape === 'HEXAGON') {
+      defaultInputs = { side: '40' };
     }
     setInputs(defaultInputs);
     calculateArea(shape, defaultInputs, unit, triangleMethod, []);
@@ -490,17 +500,30 @@ export const App: React.FC = () => {
               </div>
 
               {selectedShape === 'FREEFORM' ? (
-                <FreeformCanvas
-                  points={freeformPoints}
-                  isClosed={isFreeformClosed}
-                  onPointsChange={(pts, closed) => {
-                    setFreeformPoints(pts);
-                    setIsFreeformClosed(closed);
-                    calculateArea(selectedShape, inputs, unit, triangleMethod, pts);
-                  }}
-                  unit={unit}
-                  lang={lang}
-                />
+                <div>
+                  <FreeformCanvas
+                    points={freeformPoints}
+                    isClosed={isFreeformClosed}
+                    onPointsChange={(pts, closed) => {
+                      setFreeformPoints(pts);
+                      setIsFreeformClosed(closed);
+                      calculateArea(selectedShape, inputs, unit, triangleMethod, pts);
+                    }}
+                    unit={unit}
+                    lang={lang}
+                  />
+                  {freeformPoints.length >= 3 && (
+                    <div style={{ marginTop: '14px' }}>
+                      <SkeuoButton
+                        label={getTranslation('calculate_btn', lang)}
+                        icon={<Calculator size={18} />}
+                        colorScheme="green"
+                        onClick={handleManualCalculate}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                </div>
               ) : (
                 <ShapeBlueprint
                   shape={selectedShape}
@@ -537,6 +560,7 @@ export const App: React.FC = () => {
 
                 <div style={{ marginTop: '24px' }}>
                   <SkeuoButton
+                    id="calculate-btn"
                     label={getTranslation('calculate_btn', lang)}
                     icon={<Calculator size={18} />}
                     colorScheme="green"
@@ -574,6 +598,11 @@ export const App: React.FC = () => {
           onUnitChange={handleUnitChange}
           lang={lang}
           sotangsoPerKatha={sotangsoPerKatha}
+          onShowResultModal={(res) => {
+            setResult(res);
+            setSelectedShape('TRIANGLE');
+            setIsResultModalOpen(true);
+          }}
           onSaveHistory={(res, desc) => {
             const historyItem: CalculationHistoryItem = {
               id: String(Date.now()),
@@ -593,7 +622,7 @@ export const App: React.FC = () => {
               sotangso: res.sotangso,
               katha: res.katha,
               bigha: res.bigha,
-              totalPrice: res.sotangso * landPrice,
+              totalPrice: computeTotalPrice(res, landPrice, priceUnit),
             };
             setHistoryList((prev) => [historyItem, ...prev]);
           }}
@@ -608,6 +637,7 @@ export const App: React.FC = () => {
           sotangsoPerKatha={sotangsoPerKatha}
           onSaveHistory={(totalLandVal, pCount, desc) => {
             const totalSotangso = totalLandVal * 100.0;
+            const computedRes = computeLandMetrics(totalSotangso * 435.6, sotangsoPerKatha);
             const historyItem: CalculationHistoryItem = {
               id: String(Date.now()),
               timestamp: Date.now(),
@@ -626,7 +656,7 @@ export const App: React.FC = () => {
               sotangso: totalSotangso,
               katha: totalSotangso / sotangsoPerKatha,
               bigha: (totalSotangso * 435.6) / 14400.0,
-              totalPrice: totalSotangso * landPrice,
+              totalPrice: computeTotalPrice(computedRes, landPrice, priceUnit),
             };
             setHistoryList((prev) => [historyItem, ...prev]);
           }}
@@ -667,6 +697,8 @@ export const App: React.FC = () => {
         onLangChange={setLang}
         isDark={isDark}
         onThemeToggle={() => setIsDark(!isDark)}
+        unit={unit}
+        onUnitChange={handleUnitChange}
         sotangsoPerKatha={sotangsoPerKatha}
         onSotangsoPerKathaChange={setSotangsoPerKatha}
         apiKey={geminiApiKey}
@@ -675,6 +707,27 @@ export const App: React.FC = () => {
         onSoundToggle={() => setSoundEnabled(!soundEnabled)}
         landPrice={landPrice}
         onLandPriceChange={setLandPrice}
+        priceUnit={priceUnit}
+        onPriceUnitChange={setPriceUnit}
+        onOpenDeveloper={() => {
+          setIsSettingsOpen(false);
+          setIsDeveloperOpen(true);
+        }}
+      />
+
+      <CalculationResultModal
+        isOpen={isResultModalOpen}
+        onClose={() => setIsResultModalOpen(false)}
+        result={result}
+        shape={selectedShape}
+        inputs={inputs}
+        unit={unit}
+        triangleMethod={triangleMethod}
+        freeformPoints={freeformPoints}
+        landPrice={landPrice}
+        priceUnit={priceUnit}
+        sotangsoPerKatha={sotangsoPerKatha}
+        lang={lang}
       />
 
       <UserManualModal

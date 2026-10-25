@@ -183,9 +183,6 @@ export function formatBDT(amount: number): string {
   return `৳ ${formattedInt}.${decimalPart}`;
 }
 
-/**
- * Format standard numbers nicely with comma separation
- */
 export function formatNumber(val: number, decimals: number = 2): string {
   if (isNaN(val)) return '0.00';
   return val.toLocaleString('en-US', {
@@ -193,3 +190,32 @@ export function formatNumber(val: number, decimals: number = 2): string {
     maximumFractionDigits: decimals,
   });
 }
+
+/**
+ * Computes total land valuation according to selected unit rate (SOTANGSO, KATHA, BIGHA)
+ */
+export function computeTotalPrice(
+  metrics: CalculationResult,
+  price: number,
+  unit: 'SOTANGSO' | 'KATHA' | 'BIGHA' = 'SOTANGSO'
+): number {
+  if (!price || price <= 0) return 0;
+  switch (unit) {
+    case 'KATHA':
+      return metrics.katha * price;
+    case 'BIGHA':
+      return metrics.bigha * price;
+    case 'SOTANGSO':
+    default:
+      return metrics.sotangso * price;
+  }
+}
+
+/**
+ * Convert standard English digits to Bengali numerals
+ */
+export function toBengaliNumerals(val: string | number): string {
+  const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return String(val).replace(/[0-9]/g, (d) => bengaliDigits[parseInt(d, 10)]);
+}
+
