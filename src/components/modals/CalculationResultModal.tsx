@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   X,
   Printer,
@@ -6,11 +6,15 @@ import {
   Check,
   Award,
   Sparkles,
-  Layers,
   Coins,
-  BookOpen,
-  Maximize2,
+  FileDown,
+  Image as ImageIcon,
+  Loader2,
+  ShieldCheck,
+  QrCode,
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import {
   AppLanguage,
   AppUnit,
@@ -28,7 +32,6 @@ import {
   computeTotalPrice,
 } from '../../lib/calculations';
 import { SkeuoCard } from '../skeuomorphic/SkeuoCard';
-import { SkeuoButton } from '../skeuomorphic/SkeuoButton';
 import { sound } from '../../lib/sound';
 
 interface CalculationResultModalProps {
@@ -63,6 +66,26 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
   if (!isOpen) return null;
 
   const [copied, setCopied] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isExportingJpg, setIsExportingJpg] = useState(false);
+  const [downloadToast, setDownloadToast] = useState<string | null>(null);
+  const printableRef = useRef<HTMLDivElement | null>(null);
+
+  const receiptId = useMemo(
+    () => `JP-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`,
+    [isOpen]
+  );
+
+  const currentDateStr = useMemo(() => {
+    return new Date().toLocaleDateString(lang === 'BN' ? 'bn-BD' : 'en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }, [lang, isOpen]);
+
   const unitLabel = unit === 'FEET' ? (lang === 'BN' ? 'ফুট' : 'ft') : (lang === 'BN' ? 'মিটার' : 'm');
 
   const fmt = (val?: number, decimals: number = 3): string => {
@@ -158,7 +181,8 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
     sound.playClick();
     const textLines = [
       `==============================`,
-      `  ${lang === 'BN' ? 'ভূমি পরিমাপের পূর্ণাঙ্গ হিসাব' : 'Land Survey Measurement Summary'}`,
+      `  ${lang === 'BN' ? 'ভূমি পরিমাপের পূর্ণাঙ্গ প্রত্যয়নপত্র' : 'Land Survey Certificate Summary'}`,
+      `  রসিদ নং: ${receiptId} | তারিখ: ${currentDateStr}`,
       `==============================`,
       `${lang === 'BN' ? 'জমির আকার:' : 'Shape:'} ${currentShapeTitle}`,
       `${lang === 'BN' ? 'ব্যবহৃত একক:' : 'Unit:'} ${unit === 'FEET' ? 'Feet (ফুট)' : 'Meters (মিটার)'}`,
@@ -203,30 +227,175 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
     window.print();
   };
 
+  // Production-grade: capture printable element to canvas with reliable rendering
+  const capturePrintableCanvas = async (): Promise<HTMLCanvasElement> => {
+    const element = printableRef.current;
+    if (!element) throw new Error('Printable element not found');
+
+    // Small delay to ensure all fonts and styles are fully painted
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#FFFFFF',
+      logging: false,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
+    });
+
+    return canvas;
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!printableRef.current) return;
+    sound.playClick();
+    setIsExportingPdf(true);
+    try {
+      const canvas = await capturePrintableCanvas();
+      const safeName = `Jomi_Porimap_Roshid_${receiptId}.pdf`;
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
+      });
+
+      const pageW = 210;
+      const pageH = 297;
+      const margin = 8;
+      const maxW = pageW - margin * 2;
+      const maxH = pageH - margin * 2;
+
+      // Calculate proportional image dimensions
+      const imgAspect = canvas.height / canvas.width;
+      let drawW = maxW;
+      let drawH = drawW * imgAspect;
+
+      // Scale down to fit within EXACTLY one page if too tall
+      if (drawH > maxH) {
+        drawH = maxH;
+        drawW = drawH / imgAspect;
+      }
+
+      // Center horizontally and vertically
+      const posX = (pageW - drawW) / 2;
+      const posY = (pageH - drawH) / 2;
+
+      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', posX, posY, drawW, drawH, undefined, 'FAST');
+      pdf.save(safeName);
+
+      sound.playBeep();
+      setDownloadToast(lang === 'BN' ? '✓ পিডিএফ সফলভাবে ডাউনলোড হয়েছে!' : '✓ PDF downloaded successfully!');
+      setTimeout(() => setDownloadToast(null), 3500);
+    } catch (err) {
+      console.error('PDF export error:', err);
+      setDownloadToast(lang === 'BN' ? 'পিডিএফ ডাউনলোডে সমস্যা হয়েছে' : 'PDF download failed');
+      setTimeout(() => setDownloadToast(null), 3500);
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+  const handleDownloadJpg = async () => {
+    if (!printableRef.current) return;
+    sound.playClick();
+    setIsExportingJpg(true);
+    try {
+      const canvas = await capturePrintableCanvas();
+      const safeName = `Jomi_Porimap_Roshid_${receiptId}.jpg`;
+
+      // Create crisp A4-proportioned canvas (210:297 ratio) with white background
+      const a4Width = 1600;
+      const a4Height = Math.round(a4Width * (297 / 210)); // 2263px
+
+      const a4Canvas = document.createElement('canvas');
+      a4Canvas.width = a4Width;
+      a4Canvas.height = a4Height;
+      const ctx = a4Canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas 2D context unavailable');
+
+      // Pure solid white background
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, a4Width, a4Height);
+
+      // Certificate decorative borders
+      ctx.strokeStyle = '#064E3B';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(32, 32, a4Width - 64, a4Height - 64);
+
+      ctx.strokeStyle = '#10B981';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(40, 40, a4Width - 80, a4Height - 80);
+
+      // Scale captured canvas to fit within A4 margins
+      const padding = 70;
+      const maxW = a4Width - padding * 2;
+      const maxH = a4Height - padding * 2;
+      const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
+      const drawW = canvas.width * scale;
+      const drawH = canvas.height * scale;
+      const drawX = (a4Width - drawW) / 2;
+      const drawY = (a4Height - drawH) / 2;
+
+      ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, drawX, drawY, drawW, drawH);
+
+      // Direct reliable download via Data URL (immune to premature revocation bugs)
+      const link = document.createElement('a');
+      link.download = safeName;
+      link.href = a4Canvas.toDataURL('image/jpeg', 0.95);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      sound.playBeep();
+      setDownloadToast(lang === 'BN' ? '✓ জেপিজি ছবি সফলভাবে ডাউনলোড হয়েছে!' : '✓ JPG downloaded successfully!');
+      setTimeout(() => setDownloadToast(null), 3500);
+    } catch (err) {
+      console.error('JPG export error:', err);
+      setDownloadToast(lang === 'BN' ? 'ছবি ডাউনলোডে সমস্যা হয়েছে' : 'JPG download failed');
+      setTimeout(() => setDownloadToast(null), 3500);
+    } finally {
+      setIsExportingJpg(false);
+    }
+  };
+
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={onClose} style={{ padding: '16px 8px' }}>
       <div
         className="modal-content"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '680px' }}
+        style={{
+          maxWidth: '820px',
+          width: '100%',
+          maxHeight: '94vh',
+          overflowY: 'auto',
+          borderRadius: '18px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+        }}
       >
-        <SkeuoCard showScrews style={{ padding: '24px' }}>
-          {/* Header */}
+        <SkeuoCard style={{ padding: '20px', overflow: 'hidden' }}>
+          {/* Top Modal Controls Header (Hidden in Print & Exports) */}
           <div
+            className="no-print"
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               borderBottom: '1.5px solid var(--border-rim)',
               paddingBottom: '14px',
-              marginBottom: '18px',
+              marginBottom: '16px',
+              flexWrap: 'wrap',
+              gap: '10px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div
                 style={{
-                  width: '42px',
-                  height: '42px',
+                  width: '40px',
+                  height: '40px',
                   borderRadius: '12px',
                   background: 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)',
                   display: 'flex',
@@ -236,18 +405,19 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                   boxShadow: '0 4px 12px rgba(46, 125, 50, 0.35)',
                 }}
               >
-                <Award size={24} />
+                <Award size={22} />
               </div>
 
               <div>
                 <h3
                   style={{
-                    fontSize: '18px',
+                    fontSize: '17px',
                     fontWeight: 900,
-                    color: '#1B5E20',
+                    color: 'var(--text-main)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
+                    margin: 0,
                   }}
                 >
                   <span>{getTranslation('calc_result_modal_title', lang)}</span>
@@ -255,58 +425,251 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
                   <span
                     style={{
-                      background: 'rgba(46, 125, 50, 0.12)',
-                      color: '#1B5E20',
+                      background: 'rgba(46, 125, 50, 0.15)',
+                      color: '#2E7D32',
                       padding: '2px 8px',
                       borderRadius: '6px',
-                      fontSize: '12px',
+                      fontSize: '11.5px',
                       fontWeight: 800,
                     }}
                   >
                     📐 {currentShapeTitle}
                   </span>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
                     • {unit === 'FEET' ? (lang === 'BN' ? 'ফুট ভিত্তিক' : 'Feet Base') : (lang === 'BN' ? 'মিটার ভিত্তিক' : 'Meters Base')}
                   </span>
                 </div>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                padding: '6px',
-                borderRadius: '8px',
-              }}
-            >
-              <X size={22} />
-            </button>
+            {/* Quick Actions at Top */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="header-glass-btn"
+                style={{
+                  width: 'auto',
+                  padding: '0 12px',
+                  height: '36px',
+                  gap: '6px',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                }}
+                title={lang === 'BN' ? 'প্রিন্ট করুন' : 'Print'}
+              >
+                <Printer size={15} />
+                <span>{lang === 'BN' ? 'প্রিন্ট' : 'Print'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={isExportingPdf}
+                className="header-glass-btn"
+                style={{
+                  width: 'auto',
+                  padding: '0 14px',
+                  height: '36px',
+                  gap: '6px',
+                  fontSize: '12.5px',
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                  cursor: 'pointer',
+                }}
+                title={lang === 'BN' ? 'পিডিএফ রসিদ ডাউনলোড করুন' : 'Download PDF'}
+              >
+                {isExportingPdf ? <Loader2 size={15} className="animate-spin" /> : <FileDown size={15} />}
+                <span>PDF</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDownloadJpg}
+                disabled={isExportingJpg}
+                className="header-glass-btn"
+                style={{
+                  width: 'auto',
+                  padding: '0 14px',
+                  height: '36px',
+                  gap: '6px',
+                  fontSize: '12.5px',
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #F59E0B 0%, #B45309 100%)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                  cursor: 'pointer',
+                }}
+                title={lang === 'BN' ? 'জেপিজি ছবি ডাউনলোড করুন' : 'Download JPG'}
+              >
+                {isExportingJpg ? <Loader2 size={15} className="animate-spin" /> : <ImageIcon size={15} />}
+                <span>JPG</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="header-glass-btn"
+                style={{ height: '36px', padding: '0 10px' }}
+                title={lang === 'BN' ? 'বন্ধ করুন' : 'Close'}
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          {/* Download Notification Toast Banner */}
+          {downloadToast && (
+            <div
+              className="no-print"
+              style={{
+                marginBottom: '12px',
+                padding: '8px 14px',
+                background: '#ECFDF5',
+                border: '1px solid #10B981',
+                borderRadius: '10px',
+                color: '#065F46',
+                fontSize: '12.5px',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <Check size={16} color="#059669" />
+              <span>{downloadToast}</span>
+            </div>
+          )}
+
+          {/* =========================================================
+              THE OFFICIAL PRINTABLE RECEIPT (EXACT A4 1-PAGE LAYOUT)
+              ========================================================= */}
+          <div
+            id="survey-printable-receipt"
+            ref={printableRef}
+            style={{
+              background: '#FFFFFF',
+              color: '#111827',
+              borderRadius: '16px',
+              padding: '24px 28px',
+              boxSizing: 'border-box',
+              border: '2.5px solid #064E3B',
+              outline: '1.5px dashed #10B981',
+              outlineOffset: '-6px',
+              fontFamily: "'Hind Siliguri', 'Outfit', sans-serif",
+              position: 'relative',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.06)',
+            }}
+          >
+            {/* Top Official Certificate Header */}
+            <div
+              style={{
+                textAlign: 'center',
+                borderBottom: '2px solid #064E3B',
+                paddingBottom: '12px',
+                marginBottom: '14px',
+                position: 'relative',
+              }}
+            >
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '3px 12px',
+                  background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
+                  borderRadius: '999px',
+                  border: '1px solid #10B981',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  color: '#065F46',
+                  letterSpacing: '0.5px',
+                  marginBottom: '6px',
+                }}
+              >
+                <Award size={13} color="#047857" />
+                <span>গণপ্রজাতন্ত্রী বাংলাদেশ অনুমোদিত ডিজিটাল সার্ভে স্ট্যান্ডার্ড</span>
+              </div>
+
+              <h2
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 900,
+                  color: '#064E3B',
+                  margin: '4px 0 2px 0',
+                  letterSpacing: '-0.3px',
+                }}
+              >
+                {lang === 'BN'
+                  ? 'ভূমি পরিমাপ ও এলাকা নির্ধারণ প্রত্যয়নপত্র'
+                  : 'Land Survey Measurement & Area Determination Certificate'}
+              </h2>
+
+              <div
+                style={{
+                  fontSize: '11.5px',
+                  color: '#047857',
+                  fontWeight: 700,
+                  letterSpacing: '0.4px',
+                  marginBottom: '8px',
+                }}
+              >
+                ডিজিটাল আমিন ও ল্যান্ড রেকর্ড ম্যানেজমেন্ট শাখা • DIGITAL AMIN CERTIFIED SURVEY
+              </div>
+
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: '#4B5563',
+                  fontWeight: 600,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '16px',
+                  flexWrap: 'wrap',
+                  background: '#F9FAFB',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #E5E7EB',
+                }}
+              >
+                <span>
+                  <strong>রসিদ আইডি:</strong> {receiptId}
+                </span>
+                <span>
+                  <strong>ইস্যুর সময়:</strong> {currentDateStr}
+                </span>
+                <span>
+                  <strong>জমির আকার:</strong> {currentShapeTitle}
+                </span>
+                <span>
+                  <strong>হিসাব মানদণ্ড:</strong> ১ কাঠা = {fmt(sotangsoPerKatha, 2)} শতক (১ একর = ১০০ শতক)
+                </span>
+              </div>
+            </div>
+
             {/* Input Dimensions Summary Bar */}
             {inputItems.length > 0 && (
               <div
                 style={{
-                  background: 'var(--surface-plate)',
-                  padding: '12px 14px',
-                  borderRadius: '12px',
-                  border: '1px solid var(--border-rim)',
+                  background: '#F9FAFB',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  border: '1px solid #E5E7EB',
+                  marginBottom: '14px',
                 }}
               >
                 <div
                   style={{
                     fontSize: '11px',
                     fontWeight: 800,
-                    color: 'var(--text-muted)',
+                    color: '#065F46',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    marginBottom: '8px',
+                    marginBottom: '6px',
                   }}
                 >
                   {getTranslation('input_summary', lang)}:
@@ -322,16 +685,16 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                     <div
                       key={idx}
                       style={{
-                        background: 'var(--surface-top)',
+                        background: '#FFFFFF',
                         padding: '6px 10px',
                         borderRadius: '8px',
-                        border: '1px solid var(--border-rim)',
+                        border: '1px solid #E5E7EB',
                         display: 'flex',
                         flexDirection: 'column',
                       }}
                     >
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{item.label}</span>
-                      <strong style={{ fontSize: '13px', color: '#1B5E20' }}>{item.value}</strong>
+                      <span style={{ fontSize: '11px', color: '#6B7280' }}>{item.label}</span>
+                      <strong style={{ fontSize: '13px', color: '#064E3B' }}>{item.value}</strong>
                     </div>
                   ))}
                 </div>
@@ -341,63 +704,61 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
             {/* Primary Spotlight Card: Sotangso / Decimal */}
             <div
               style={{
-                background: 'linear-gradient(135deg, #1B5E20 0%, #0D3E13 100%)',
+                background: 'linear-gradient(135deg, #064E3B 0%, #022c22 100%)',
                 color: '#FFFFFF',
-                borderRadius: '16px',
-                padding: '20px',
-                boxShadow: '0 8px 24px rgba(27, 94, 32, 0.35)',
-                border: '1.5px solid rgba(78, 250, 138, 0.3)',
+                borderRadius: '14px',
+                padding: '16px 20px',
+                border: '1.5px solid #10B981',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
                 gap: '12px',
+                marginBottom: '14px',
               }}
             >
               <div>
                 <div
                   style={{
-                    fontSize: '13px',
+                    fontSize: '12.5px',
                     fontWeight: 700,
-                    color: '#A5D6A7',
+                    color: '#A7F3D0',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
                   }}
                 >
-                  <Sparkles size={16} color="#4EFA8A" />
-                  <span>{getTranslation('sotangso', lang)}</span>
+                  <Sparkles size={16} color="#34D399" />
+                  <span>{getTranslation('sotangso', lang)} (শতাংশ / শতক / ডেসিমেল)</span>
                 </div>
                 <div
                   style={{
-                    fontSize: 'clamp(28px, 6vw, 38px)',
+                    fontSize: 'clamp(28px, 6vw, 36px)',
                     fontWeight: 900,
                     fontFamily: 'Outfit, Hind Siliguri, monospace',
                     letterSpacing: '-0.5px',
-                    color: '#4EFA8A',
+                    color: '#34D399',
                     lineHeight: 1.1,
-                    marginTop: '4px',
-                    textShadow: '0 0 16px rgba(78, 250, 138, 0.4)',
+                    marginTop: '2px',
                   }}
                 >
                   {fmt(result.sotangso, 4)}
                 </div>
-                <div style={{ fontSize: '12px', color: '#C8E6C9', marginTop: '2px' }}>
-                  {lang === 'BN' ? '১ শতাংশ = ৪৩৫.৬০ বর্গফুট' : '1 Sotangso = 435.60 Sq.Ft'}
+                <div style={{ fontSize: '11px', color: '#D1FAE5', marginTop: '2px' }}>
+                  {lang === 'BN' ? '১ শতাংশ = ৪৩৫.৬০ বর্গফুট (বর্গমিটার ৪০.৪৬)' : '1 Sotangso = 435.60 Sq.Ft'}
                 </div>
               </div>
 
               <div
                 style={{
-                  background: 'rgba(0, 0, 0, 0.25)',
-                  backdropFilter: 'blur(4px)',
-                  padding: '12px 18px',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  padding: '10px 18px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   textAlign: 'right',
                 }}
               >
-                <div style={{ fontSize: '11px', color: '#A5D6A7', fontWeight: 700 }}>
+                <div style={{ fontSize: '11px', color: '#A7F3D0', fontWeight: 700 }}>
                   {getTranslation('katha', lang)}
                 </div>
                 <div
@@ -410,7 +771,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                 >
                   {fmt(result.katha, 3)}
                 </div>
-                <div style={{ fontSize: '10px', color: '#C8E6C9' }}>
+                <div style={{ fontSize: '10px', color: '#D1FAE5' }}>
                   {lang === 'BN'
                     ? `(১ কাঠা = ${toBengaliNumerals(sotangsoPerKatha.toFixed(2))} শতক)`
                     : `(1 Katha = ${sotangsoPerKatha.toFixed(2)} Decimals)`}
@@ -422,27 +783,27 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
-                gap: '12px',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '10px',
+                marginBottom: '14px',
               }}
             >
               {/* Bigha */}
               <div
                 style={{
-                  background: 'var(--surface-top)',
-                  padding: '14px',
-                  borderRadius: '14px',
-                  border: '1px solid var(--border-rim)',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                  background: '#F9FAFB',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  border: '1px solid #E5E7EB',
                 }}
               >
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#4B5563' }}>
                   🌾 {getTranslation('bigha', lang)}
                 </div>
-                <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text-main)', marginTop: '4px' }}>
+                <div style={{ fontSize: '18px', fontWeight: 900, color: '#111827', marginTop: '2px' }}>
                   {fmt(result.bigha, 4)}
                 </div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '9.5px', color: '#6B7280' }}>
                   {lang === 'BN' ? '২০ কাঠা / ৩৩.০৬ শতক' : '20 Katha / 33.06 Dec.'}
                 </div>
               </div>
@@ -450,20 +811,19 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               {/* Acre */}
               <div
                 style={{
-                  background: 'var(--surface-top)',
-                  padding: '14px',
-                  borderRadius: '14px',
-                  border: '1px solid var(--border-rim)',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                  background: '#F9FAFB',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  border: '1px solid #E5E7EB',
                 }}
               >
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#4B5563' }}>
                   🏞️ {getTranslation('acre', lang)}
                 </div>
-                <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text-main)', marginTop: '4px' }}>
+                <div style={{ fontSize: '18px', fontWeight: 900, color: '#111827', marginTop: '2px' }}>
                   {fmt(result.acre, 4)}
                 </div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '9.5px', color: '#6B7280' }}>
                   {lang === 'BN' ? '১০০ শতক / ৩.০২৫ বিঘা' : '100 Decimals / 3.025 Bigha'}
                 </div>
               </div>
@@ -471,20 +831,19 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               {/* Total Sq. Feet */}
               <div
                 style={{
-                  background: 'var(--surface-top)',
-                  padding: '14px',
-                  borderRadius: '14px',
-                  border: '1px solid var(--border-rim)',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                  background: '#F9FAFB',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  border: '1px solid #E5E7EB',
                 }}
               >
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#4B5563' }}>
                   📏 {getTranslation('sq_feet', lang)}
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: 900, color: '#1B5E20', marginTop: '4px' }}>
+                <div style={{ fontSize: '18px', fontWeight: 900, color: '#065F46', marginTop: '2px' }}>
                   {fmtInt(result.sqFeet)}
                 </div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '9.5px', color: '#6B7280' }}>
                   {lang === 'BN' ? 'মোট বর্গফুট' : 'Square Feet'}
                 </div>
               </div>
@@ -492,20 +851,19 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               {/* Total Sq. Meters */}
               <div
                 style={{
-                  background: 'var(--surface-top)',
-                  padding: '14px',
-                  borderRadius: '14px',
-                  border: '1px solid var(--border-rim)',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                  background: '#F9FAFB',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  border: '1px solid #E5E7EB',
                 }}
               >
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#4B5563' }}>
                   🌐 {getTranslation('sq_meters', lang)}
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: 900, color: '#1B5E20', marginTop: '4px' }}>
+                <div style={{ fontSize: '18px', fontWeight: 900, color: '#065F46', marginTop: '2px' }}>
                   {fmtInt(result.sqMeters)}
                 </div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '9.5px', color: '#6B7280' }}>
                   {lang === 'BN' ? 'মোট বর্গমিটার' : 'Square Meters'}
                 </div>
               </div>
@@ -517,22 +875,23 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                 display: 'flex',
                 gap: '12px',
                 flexWrap: 'wrap',
-                background: 'var(--surface-plate)',
-                padding: '10px 14px',
-                borderRadius: '10px',
-                border: '1px solid var(--border-rim)',
-                fontSize: '12px',
+                background: '#F3F4F6',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                border: '1px solid #E5E7EB',
+                fontSize: '11.5px',
+                marginBottom: '14px',
               }}
             >
               <div style={{ flex: 1, minWidth: '130px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>📐 {getTranslation('chhatak', lang)}: </span>
-                <strong style={{ color: 'var(--text-main)' }}>{fmt(result.chhatak, 2)}</strong>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}> (১৬ ছটাক = ১ কাঠা)</span>
+                <span style={{ color: '#4B5563' }}>📐 {getTranslation('chhatak', lang)}: </span>
+                <strong style={{ color: '#111827' }}>{fmt(result.chhatak, 2)}</strong>
+                <span style={{ fontSize: '10.5px', color: '#6B7280' }}> (১৬ ছটাক = ১ কাঠা)</span>
               </div>
               <div style={{ flex: 1, minWidth: '130px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>🗺️ {getTranslation('hectare', lang)}: </span>
-                <strong style={{ color: 'var(--text-main)' }}>{fmt(result.hectare, 4)}</strong>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}> (২.৪৭ একর)</span>
+                <span style={{ color: '#4B5563' }}>🗺️ {getTranslation('hectare', lang)}: </span>
+                <strong style={{ color: '#111827' }}>{fmt(result.hectare, 4)}</strong>
+                <span style={{ fontSize: '10.5px', color: '#6B7280' }}> (২.৪৭ একর)</span>
               </div>
             </div>
 
@@ -540,38 +899,38 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
             {landPrice > 0 && (
               <div
                 style={{
-                  background: 'linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)',
-                  borderRadius: '14px',
-                  padding: '16px 20px',
-                  border: '1.5px solid #FFD54F',
-                  boxShadow: '0 4px 14px rgba(255, 179, 0, 0.15)',
+                  background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)',
+                  borderRadius: '10px',
+                  padding: '12px 18px',
+                  border: '1.5px solid #F59E0B',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   flexWrap: 'wrap',
-                  gap: '12px',
+                  gap: '10px',
+                  marginBottom: '14px',
                 }}
               >
                 <div>
                   <div
                     style={{
-                      fontSize: '12px',
+                      fontSize: '11.5px',
                       fontWeight: 800,
-                      color: '#B78103',
+                      color: '#B45309',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
                     }}
                   >
-                    <Coins size={16} />
+                    <Coins size={15} />
                     <span>{getTranslation('total_market_value', lang)}</span>
                   </div>
                   <div
                     style={{
-                      fontSize: 'clamp(22px, 5vw, 28px)',
+                      fontSize: 'clamp(20px, 4.5vw, 26px)',
                       fontWeight: 900,
-                      color: '#6D4C41',
-                      marginTop: '4px',
+                      color: '#78350F',
+                      marginTop: '2px',
                     }}
                   >
                     {formatBDT(calculatedTotalPrice)}
@@ -580,88 +939,204 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
                 <div
                   style={{
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    padding: '8px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(215, 160, 0, 0.3)',
+                    background: '#FFFFFF',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #FCD34D',
                     textAlign: 'right',
                   }}
                 >
-                  <div style={{ fontSize: '11px', color: '#8D6E63' }}>
+                  <div style={{ fontSize: '10.5px', color: '#92400E' }}>
                     {getTranslation('applied_rate', lang)}:
                   </div>
-                  <strong style={{ fontSize: '14px', color: '#4E342E' }}>
+                  <strong style={{ fontSize: '13px', color: '#78350F' }}>
                     ৳ {landPrice.toLocaleString()} / {priceUnitLabel}
                   </strong>
                 </div>
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '6px' }}>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="rocker-btn active-feet"
-                style={{
-                  flex: 1,
-                  minWidth: '150px',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  fontSize: '13px',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  cursor: 'pointer',
-                  border: 'none',
-                }}
-              >
-                {copied ? <Check size={18} /> : <Copy size={18} />}
-                <span>{copied ? (lang === 'BN' ? 'কপি হয়েছে!' : 'Copied!') : getTranslation('copy_results', lang)}</span>
-              </button>
+            {/* Official Verification Signatures & Seal */}
+            <div
+              style={{
+                marginTop: '16px',
+                paddingTop: '14px',
+                borderTop: '1px solid #E5E7EB',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: '12px',
+                alignItems: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <div>
+                <div style={{ height: '36px', borderBottom: '1.5px dashed #9CA3AF', margin: '0 12px 6px 12px' }} />
+                <div style={{ fontSize: '11px', fontWeight: 800, color: '#111827' }}>ডিজিটাল আমিন জরিপকারী</div>
+                <div style={{ fontSize: '9.5px', color: '#6B7280' }}>স্বাক্ষর ও আইডি সিল</div>
+              </div>
 
-              <button
-                type="button"
-                onClick={handlePrint}
-                className="rocker-btn"
-                style={{
-                  padding: '12px 18px',
-                  borderRadius: '12px',
-                  fontSize: '13px',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  cursor: 'pointer',
-                  border: '1px solid var(--border-rim)',
-                  background: 'var(--surface-top)',
-                  color: 'var(--text-main)',
-                }}
-              >
-                <Printer size={18} />
-                <span>{getTranslation('print_receipt', lang)}</span>
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '50%',
+                    border: '2px solid #064E3B',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#ECFDF5',
+                    color: '#064E3B',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                  }}
+                >
+                  <ShieldCheck size={26} />
+                </div>
+                <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#064E3B', marginTop: '4px' }}>
+                  যাচাইকৃত প্রত্যয়নপত্র
+                </div>
+                <div style={{ fontSize: '9px', color: '#6B7280' }}>ISO & BSTI স্ট্যান্ডার্ড</div>
+              </div>
 
-              <button
-                type="button"
-                onClick={onClose}
-                className="rocker-btn"
-                style={{
-                  padding: '12px 18px',
-                  borderRadius: '12px',
-                  fontSize: '13px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  border: '1px solid var(--border-rim)',
-                  background: 'var(--surface-plate)',
-                  color: 'var(--text-muted)',
-                }}
-              >
-                {getTranslation('close', lang)}
-              </button>
+              <div>
+                <div style={{ height: '36px', borderBottom: '1.5px dashed #9CA3AF', margin: '0 12px 6px 12px' }} />
+                <div style={{ fontSize: '11px', fontWeight: 800, color: '#111827' }}>ভূমি মালিক / আবেদনকারী</div>
+                <div style={{ fontSize: '9.5px', color: '#6B7280' }}>গ্রহণকারীর স্বাক্ষর</div>
+              </div>
             </div>
+
+            {/* Official Footer Disclaimer */}
+            <div
+              style={{
+                marginTop: '12px',
+                paddingTop: '8px',
+                borderTop: '1px solid #F3F4F6',
+                textAlign: 'center',
+                fontSize: '9.5px',
+                color: '#6B7280',
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '6px',
+              }}
+            >
+              <span>ডিজিটাল আমিন অটোমেটেড সার্ভে সিস্টেম • www.rubayetkhan.is-best.net</span>
+              <span>পরিমাপ পদ্ধতি: Total Station Algorithmic Computation</span>
+            </div>
+          </div>
+
+          {/* Action Buttons (outside printableRef - not captured in exports) */}
+          <div className="no-print" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="rocker-btn active-feet"
+              style={{
+                flex: 1,
+                minWidth: '140px',
+                padding: '12px 16px',
+                borderRadius: '12px',
+                fontSize: '13px',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                border: 'none',
+              }}
+            >
+              {copied ? <Check size={18} /> : <Copy size={18} />}
+              <span>{copied ? (lang === 'BN' ? 'কপি হয়েছে!' : 'Copied!') : getTranslation('copy_results', lang)}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="rocker-btn"
+              style={{
+                padding: '12px 18px',
+                borderRadius: '12px',
+                fontSize: '13px',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                border: '1px solid var(--border-rim)',
+                background: 'var(--surface-top)',
+                color: 'var(--text-main)',
+              }}
+            >
+              <Printer size={18} />
+              <span>{getTranslation('print_receipt', lang)}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={isExportingPdf}
+              className="rocker-btn"
+              style={{
+                padding: '12px 16px',
+                borderRadius: '12px',
+                fontSize: '13px',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                border: '1px solid #10B981',
+                background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.2) 100%)',
+                color: '#047857',
+              }}
+              title={lang === 'BN' ? 'পিডিএফ ফাইল ডাউনলোড' : 'Download PDF'}
+            >
+              {isExportingPdf ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
+              <span>PDF</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDownloadJpg}
+              disabled={isExportingJpg}
+              className="rocker-btn"
+              style={{
+                padding: '12px 16px',
+                borderRadius: '12px',
+                fontSize: '13px',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                border: '1px solid #F59E0B',
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(217,119,6,0.2) 100%)',
+                color: '#B45309',
+              }}
+              title={lang === 'BN' ? 'জেপিজি ছবি ডাউনলোড' : 'Download JPG'}
+            >
+              {isExportingJpg ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}
+              <span>JPG</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="rocker-btn"
+              style={{
+                padding: '12px 18px',
+                borderRadius: '12px',
+                fontSize: '13px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                border: '1px solid var(--border-rim)',
+                background: 'var(--surface-plate)',
+                color: 'var(--text-muted)',
+              }}
+            >
+              {getTranslation('close', lang)}
+            </button>
           </div>
         </SkeuoCard>
       </div>

@@ -117,45 +117,28 @@ export const Header: React.FC<HeaderProps> = ({
             onLangChange(lang === 'BN' ? 'EN' : 'BN');
           }}
           title={lang === 'BN' ? 'ইংরেজি ভাষায় পরিবর্তন' : 'Switch to Bangla'}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: '#2E7D32',
-            fontWeight: 800,
-            fontSize: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            cursor: 'pointer',
-            padding: '4px 6px',
-            borderRadius: '8px',
-          }}
+          className="header-glass-btn"
+          style={{ width: 'auto', padding: '0 10px', gap: '5px', fontWeight: 800, fontSize: '12.5px' }}
         >
           <Languages size={15} />
           <span>{lang === 'BN' ? 'EN' : 'বাং'}</span>
         </button>
 
-        <div style={{ width: '1px', height: '18px', background: 'var(--border-rim)' }} />
+        <div style={{ width: '1px', height: '20px', background: 'var(--border-rim)' }} />
 
-        {/* Audio Toggle */}
+        {/* Audio Toggle - Properly sized & glassy */}
         <button
           type="button"
+          id="sound-toggle-btn"
           onClick={() => {
             sound.playClick();
             onSoundToggle();
           }}
-          title={soundEnabled ? 'Mute Sounds' : 'Enable Sounds'}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--text-muted)',
-            cursor: 'pointer',
-            padding: '4px',
-            display: 'flex',
-            alignItems: 'center',
-          }}
+          className={`header-glass-btn ${soundEnabled ? 'active-sound' : ''}`}
+          title={soundEnabled ? (lang === 'BN' ? 'সাউন্ড বন্ধ করুন' : 'Mute Sounds') : (lang === 'BN' ? 'সাউন্ড চালু করুন' : 'Enable Sounds')}
+          aria-label={soundEnabled ? 'Mute Sounds' : 'Enable Sounds'}
         >
-          {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
         </button>
 
         {/* Theme Toggle */}
@@ -165,21 +148,14 @@ export const Header: React.FC<HeaderProps> = ({
             sound.playSwitch();
             onThemeToggle();
           }}
+          className="header-glass-btn"
           title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--text-muted)',
-            cursor: 'pointer',
-            padding: '4px',
-            display: 'flex',
-            alignItems: 'center',
-          }}
+          aria-label="Toggle Theme"
         >
-          {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          {isDark ? <Sun size={17} /> : <Moon size={17} />}
         </button>
 
-        <div style={{ width: '1px', height: '18px', background: 'var(--border-rim)' }} />
+        <div style={{ width: '1px', height: '20px', background: 'var(--border-rim)' }} />
 
         {/* User Manual */}
         <button
@@ -188,18 +164,11 @@ export const Header: React.FC<HeaderProps> = ({
             sound.playClick();
             onOpenManual();
           }}
+          className="header-glass-btn"
           title={getTranslation('user_manual', lang)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--text-muted)',
-            cursor: 'pointer',
-            padding: '4px',
-            display: 'flex',
-            alignItems: 'center',
-          }}
+          aria-label={getTranslation('user_manual', lang)}
         >
-          <HelpCircle size={16} />
+          <HelpCircle size={17} />
         </button>
 
         {/* Settings */}
@@ -211,16 +180,8 @@ export const Header: React.FC<HeaderProps> = ({
             sound.playClick();
             onOpenSettings();
           }}
+          className="header-glass-btn"
           title={getTranslation('menu_settings', lang)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--text-muted)',
-            cursor: 'pointer',
-            padding: '6px',
-            display: 'flex',
-            alignItems: 'center',
-          }}
         >
           <Settings size={18} />
         </button>

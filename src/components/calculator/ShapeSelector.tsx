@@ -66,35 +66,46 @@ export const ShapeSelector: React.FC<ShapeSelectorProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '10px 12px',
-              borderRadius: '12px',
+              padding: '11px 14px',
+              borderRadius: '14px',
               border: isSelected
-                ? '2px solid #2E7D32'
+                ? '1.5px solid #10B981'
                 : '1px solid var(--border-rim)',
               background: isSelected
-                ? 'linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 100%)'
+                ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.24) 100%)'
                 : 'var(--surface-plate)',
-              color: isSelected ? '#1B5E20' : 'var(--text-main)',
+              color: isSelected ? 'var(--emerald-deep)' : 'var(--text-main)',
               fontWeight: isSelected ? 800 : 600,
               fontSize: '13px',
               cursor: 'pointer',
               boxShadow: isSelected
-                ? '0 3px 8px rgba(46, 125, 50, 0.25)'
-                : 'inset 0 1px 2px rgba(0, 0, 0, 0.05)',
-              transition: 'all 0.15s ease',
+                ? '0 6px 16px rgba(16, 185, 129, 0.24), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                : 'inset 0 1px 2px rgba(0, 0, 0, 0.04)',
+              transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+              transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
               textAlign: 'left',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
             }}
           >
             <span
               style={{
-                color: isSelected ? '#2E7D32' : 'var(--text-muted)',
+                color: isSelected ? '#10B981' : 'var(--text-muted)',
                 display: 'flex',
                 alignItems: 'center',
+                transition: 'color 0.2s ease',
               }}
             >
               {item.icon}
             </span>
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontWeight: isSelected ? 800 : 600,
+              }}
+            >
               {getTranslation(item.labelKey, lang)}
             </span>
           </button>

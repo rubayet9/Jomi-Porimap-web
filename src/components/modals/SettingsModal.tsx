@@ -16,6 +16,7 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
+  ShieldCheck,
 } from 'lucide-react';
 import { AppLanguage, AppUnit, PriceUnit } from '../../types';
 import { getTranslation } from '../../lib/translations';
@@ -44,6 +45,7 @@ interface SettingsModalProps {
   priceUnit: PriceUnit;
   onPriceUnitChange: (pUnit: PriceUnit) => void;
   onOpenDeveloper: () => void;
+  currentUser?: { displayName: string | null; email: string | null } | null;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -66,6 +68,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   priceUnit,
   onPriceUnitChange,
   onOpenDeveloper,
+  currentUser,
 }) => {
   if (!isOpen) return null;
 
@@ -85,6 +88,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setCustomKatha(String(sotangsoPerKatha));
   }, [apiKey, landPrice, sotangsoPerKatha, isOpen]);
 
+  const isAdmin = currentUser?.email?.toLowerCase().trim() === 'rubayetfivermail@gmail.com';
+
   const handleKathaPreset = (val: number) => {
     sound.playClick();
     setCustomKatha(String(val));
@@ -101,7 +106,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const handleSave = () => {
     sound.playClick();
-    onApiKeyChange(tempApiKey);
+    if (isAdmin) {
+      onApiKeyChange(tempApiKey);
+    }
     const parsedPrice = parseFloat(tempPrice) || 0;
     onLandPriceChange(parsedPrice);
 
@@ -765,105 +772,121 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span>{getTranslation('about_us', lang)}</span>
             </button>
 
-            {/* 9. Google Gemini API Key Input (Hidden/Masked with toggle) */}
-            <div
-              style={{
-                background: 'var(--surface-plate)',
-                padding: '14px',
-                borderRadius: '14px',
-                border: '1px solid var(--border-rim)',
-              }}
-            >
+            {/* 9. Google Gemini API Key Input (Admin Only: rubayetfivermail@gmail.com) */}
+            {isAdmin && (
               <div
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '4px',
+                  background: 'var(--surface-plate)',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  border: '1.5px solid rgba(16, 185, 129, 0.4)',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.12)',
                 }}
               >
                 <div
                   style={{
-                    fontSize: '13px',
-                    fontWeight: 800,
-                    color: 'var(--text-main)',
                     display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    gap: '6px',
+                    marginBottom: '4px',
                   }}
                 >
-                  <Key size={14} color="#2E7D32" />
-                  <span>{getTranslation('gemini_key', lang)}</span>
+                  <div
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 800,
+                      color: 'var(--text-main)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <ShieldCheck size={16} color="#10B981" />
+                    <span>{getTranslation('gemini_key', lang)}</span>
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 800,
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#059669',
+                        padding: '2px 6px',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                      }}
+                    >
+                      Admin Only
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      setShowApiKey(!showApiKey);
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#059669',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '2px 6px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    {showApiKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                    <span>{showApiKey ? (lang === 'BN' ? 'লুকান' : 'Hide') : (lang === 'BN' ? 'দেখুন' : 'Show')}</span>
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playClick();
-                    setShowApiKey(!showApiKey);
-                  }}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#2E7D32',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '2px 6px',
-                    borderRadius: '6px',
-                  }}
-                >
-                  {showApiKey ? <EyeOff size={14} /> : <Eye size={14} />}
-                  <span>{showApiKey ? (lang === 'BN' ? 'লুকান' : 'Hide') : (lang === 'BN' ? 'দেখুন' : 'Show')}</span>
-                </button>
-              </div>
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                  {getTranslation('gemini_key_hint', lang)}
+                </p>
 
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                {getTranslation('gemini_key_hint', lang)}
-              </p>
-
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showApiKey ? 'text' : 'password'}
-                  value={tempApiKey}
-                  onChange={(e) => setTempApiKey(e.target.value)}
-                  className="skeuo-input"
-                  placeholder="••••••••••••••••••••••••"
-                  style={{
-                    fontSize: '12px',
-                    fontFamily: showApiKey ? 'monospace' : 'inherit',
-                    letterSpacing: showApiKey ? 'normal' : '2px',
-                    paddingRight: '38px',
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playClick();
-                    setShowApiKey(!showApiKey);
-                  }}
-                  style={{
-                    position: 'absolute',
-                    right: '10px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--text-muted)',
-                    cursor: 'pointer',
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showApiKey ? 'text' : 'password'}
+                    value={tempApiKey}
+                    onChange={(e) => setTempApiKey(e.target.value)}
+                    className="skeuo-input"
+                    placeholder="••••••••••••••••••••••••"
+                    style={{
+                      fontSize: '12px',
+                      fontFamily: showApiKey ? 'monospace' : 'inherit',
+                      letterSpacing: showApiKey ? 'normal' : '2px',
+                      paddingRight: '38px',
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      setShowApiKey(!showApiKey);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 10. Sound Toggle */}
             <div
@@ -871,11 +894,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '0 4px',
+                padding: '6px 8px',
+                background: 'var(--surface-plate)',
+                borderRadius: '14px',
+                border: '1px solid var(--border-rim)',
               }}
             >
-              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>
-                {getTranslation('sound_fx', lang)}
+              <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '16px' }}>🔊</span>
+                <span>{getTranslation('sound_fx', lang)}</span>
               </div>
               <button
                 type="button"
@@ -885,15 +912,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 }}
                 className={`rocker-btn ${soundEnabled ? 'active-feet' : ''}`}
                 style={{
-                  borderRadius: '10px',
-                  padding: '6px 14px',
-                  border: '1px solid var(--border-rim)',
-                  fontSize: '12px',
+                  borderRadius: '11px',
+                  padding: '7px 16px',
+                  fontSize: '12.5px',
+                  fontWeight: 800,
                   cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  minWidth: '85px',
+                  justifyContent: 'center',
                 }}
               >
-                {soundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
-                <span>{soundEnabled ? 'ON' : 'OFF'}</span>
+                {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                <span>{soundEnabled ? (lang === 'BN' ? 'চালু' : 'ON') : (lang === 'BN' ? 'বন্ধ' : 'OFF')}</span>
               </button>
             </div>
 

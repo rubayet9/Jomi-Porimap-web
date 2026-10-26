@@ -46,9 +46,10 @@ import { CalculationResultModal } from './components/modals/CalculationResultMod
 import { AuthModal } from './components/auth/AuthModal';
 import { UserProfileModal } from './components/auth/UserProfileModal';
 import { auth, onAuthStateChanged, FirebaseUser } from './lib/firebase';
+import { GlobalErrorPopup } from './components/common/GlobalErrorPopup';
 
 import confetti from 'canvas-confetti';
-import { Calculator, Sparkles, BookOpen, AlertCircle } from 'lucide-react';
+import { Calculator, Sparkles, BookOpen, AlertCircle, RotateCcw, Trash2 } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Global Preferences
@@ -493,7 +494,7 @@ export const App: React.FC = () => {
 
       {/* 3. Tab Contents */}
       {activeTab === 'CALCULATOR' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div key="CALCULATOR" className="tab-content-enter" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Shape Selector Bar */}
           <SkeuoCard style={{ padding: '16px' }}>
             <div style={{ marginBottom: '10px', fontSize: '13px', fontWeight: 800, color: 'var(--text-muted)' }}>
@@ -521,8 +522,10 @@ export const App: React.FC = () => {
             <SkeuoUnitRocker unit={unit} onUnitChange={handleUnitChange} lang={lang} />
           </div>
 
-          {/* Blueprint Canvas & Dynamic Inputs Grid */}
+          {/* Blueprint Canvas & Dynamic Inputs Grid with Smooth Shape Transition */}
           <div
+            key={`${selectedShape}-${unit}`}
+            className="shape-content-enter"
             style={{
               display: 'grid',
               gridTemplateColumns: selectedShape === 'FREEFORM' ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))',
@@ -582,9 +585,37 @@ export const App: React.FC = () => {
             {selectedShape !== 'FREEFORM' && (
               <SkeuoCard showScrews style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
-                  <div style={{ marginBottom: '14px', fontSize: '14px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>✏️</span>
-                    <span>{getTranslation('input_fields', lang)}</span>
+                  <div style={{ marginBottom: '14px', fontSize: '14px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>✏️</span>
+                      <span>{getTranslation('input_fields', lang)}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      id="clear-inputs-header-btn"
+                      onClick={handleResetCalculator}
+                      className="header-glass-btn"
+                      title={lang === 'BN' ? 'সব পরিমাপ ইনপুট মুছে ফেলুন' : 'Reset all inputs'}
+                      style={{
+                        padding: '6px 14px',
+                        fontSize: '12.5px',
+                        fontWeight: 800,
+                        color: '#EF4444',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.18) 100%)',
+                        border: '1.5px solid rgba(239, 68, 68, 0.4)',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(239, 68, 68, 0.15)',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      <RotateCcw size={14} />
+                      <span>{lang === 'BN' ? 'মুছে ফেলুন' : 'Clear'}</span>
+                    </button>
                   </div>
 
                   <DimensionInputs
@@ -601,15 +632,45 @@ export const App: React.FC = () => {
                   />
                 </div>
 
-                <div style={{ marginTop: '24px' }}>
-                  <SkeuoButton
-                    id="calculate-btn"
-                    label={getTranslation('calculate_btn', lang)}
-                    icon={<Calculator size={18} />}
-                    colorScheme="green"
-                    onClick={handleManualCalculate}
-                    className="w-full"
-                  />
+                <div style={{ marginTop: '24px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <div style={{ flex: 1 }}>
+                    <SkeuoButton
+                      id="calculate-btn"
+                      label={getTranslation('calculate_btn', lang)}
+                      icon={<Calculator size={18} />}
+                      colorScheme="green"
+                      onClick={handleManualCalculate}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    id="reset-measurements-btn"
+                    onClick={handleResetCalculator}
+                    className="rocker-btn"
+                    title={lang === 'BN' ? 'সব পরিমাপ মুছে ফেলুন ও নতুন পরিমাপ দিন' : 'Clear and reset inputs'}
+                    style={{
+                      height: '46px',
+                      padding: '0 18px',
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      border: '1.5px solid rgba(239, 68, 68, 0.5)',
+                      background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.2) 100%)',
+                      color: '#EF4444',
+                      boxShadow: '0 2px 8px rgba(239, 68, 68, 0.2)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Trash2 size={18} />
+                    <span>{lang === 'BN' ? 'মুছে ফেলুন' : 'Clear All'}</span>
+                  </button>
                 </div>
               </SkeuoCard>
             )}
@@ -634,98 +695,106 @@ export const App: React.FC = () => {
 
       {/* Triangulation Tab */}
       {activeTab === 'TRIANGULATION' && (
-        <TriangulationTab
-          triangles={triangulationTriangles}
-          onTrianglesChange={setTriangulationTriangles}
-          unit={unit}
-          onUnitChange={handleUnitChange}
-          lang={lang}
-          sotangsoPerKatha={sotangsoPerKatha}
-          onShowResultModal={(res) => {
-            setResult(res);
-            setSelectedShape('TRIANGLE');
-            setIsResultModalOpen(true);
-          }}
-          onSaveHistory={(res, desc) => {
-            const historyItem: CalculationHistoryItem = {
-              id: String(Date.now()),
-              timestamp: Date.now(),
-              dateStr: new Date().toLocaleDateString(lang === 'BN' ? 'bn-BD' : 'en-US', {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              }),
-              tabType: 'TRIANGULATION',
-              shapeType: 'Triangulation',
-              unit: unit,
-              inputsDesc: desc,
-              sqFeet: res.sqFeet,
-              sqMeters: res.sqMeters,
-              sotangso: res.sotangso,
-              katha: res.katha,
-              bigha: res.bigha,
-              totalPrice: computeTotalPrice(res, landPrice, priceUnit),
-            };
-            setHistoryList((prev) => [historyItem, ...prev]);
-          }}
-        />
+        <div key="TRIANGULATION" className="tab-content-enter">
+          <TriangulationTab
+            triangles={triangulationTriangles}
+            onTrianglesChange={setTriangulationTriangles}
+            unit={unit}
+            onUnitChange={handleUnitChange}
+            lang={lang}
+            sotangsoPerKatha={sotangsoPerKatha}
+            onShowResultModal={(res) => {
+              setResult(res);
+              setSelectedShape('TRIANGLE');
+              setIsResultModalOpen(true);
+            }}
+            onSaveHistory={(res, desc) => {
+              const historyItem: CalculationHistoryItem = {
+                id: String(Date.now()),
+                timestamp: Date.now(),
+                dateStr: new Date().toLocaleDateString(lang === 'BN' ? 'bn-BD' : 'en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+                tabType: 'TRIANGULATION',
+                shapeType: 'Triangulation',
+                unit: unit,
+                inputsDesc: desc,
+                sqFeet: res.sqFeet,
+                sqMeters: res.sqMeters,
+                sotangso: res.sotangso,
+                katha: res.katha,
+                bigha: res.bigha,
+                totalPrice: computeTotalPrice(res, landPrice, priceUnit),
+              };
+              setHistoryList((prev) => [historyItem, ...prev]);
+            }}
+          />
+        </div>
       )}
 
       {/* Khatian Tab */}
       {activeTab === 'KHATIAN' && (
-        <KhatianTab
-          lang={lang}
-          landPrice={landPrice}
-          priceUnit={priceUnit}
-          sotangsoPerKatha={sotangsoPerKatha}
-          unit={unit}
-          onUnitChange={handleUnitChange}
-          onSaveHistory={(sotangsoVal, desc) => {
-            const computedRes = computeLandMetrics(sotangsoVal * 435.6, sotangsoPerKatha);
-            const historyItem: CalculationHistoryItem = {
-              id: String(Date.now()),
-              timestamp: Date.now(),
-              dateStr: new Date().toLocaleDateString(lang === 'BN' ? 'bn-BD' : 'en-US', {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              }),
-              tabType: 'KHATIAN',
-              shapeType: 'Khatian',
-              unit: unit,
-              inputsDesc: desc,
-              sqFeet: sotangsoVal * 435.6,
-              sqMeters: (sotangsoVal * 435.6) / 10.7639,
-              sotangso: sotangsoVal,
-              katha: sotangsoVal / sotangsoPerKatha,
-              bigha: (sotangsoVal * 435.6) / 14400.0,
-              totalPrice: computeTotalPrice(computedRes, landPrice, priceUnit),
-            };
-            setHistoryList((prev) => [historyItem, ...prev]);
-          }}
-        />
+        <div key="KHATIAN" className="tab-content-enter">
+          <KhatianTab
+            lang={lang}
+            landPrice={landPrice}
+            priceUnit={priceUnit}
+            sotangsoPerKatha={sotangsoPerKatha}
+            unit={unit}
+            onUnitChange={handleUnitChange}
+            onSaveHistory={(sotangsoVal, desc) => {
+              const computedRes = computeLandMetrics(sotangsoVal * 435.6, sotangsoPerKatha);
+              const historyItem: CalculationHistoryItem = {
+                id: String(Date.now()),
+                timestamp: Date.now(),
+                dateStr: new Date().toLocaleDateString(lang === 'BN' ? 'bn-BD' : 'en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+                tabType: 'KHATIAN',
+                shapeType: 'Khatian',
+                unit: unit,
+                inputsDesc: desc,
+                sqFeet: sotangsoVal * 435.6,
+                sqMeters: (sotangsoVal * 435.6) / 10.7639,
+                sotangso: sotangsoVal,
+                katha: sotangsoVal / sotangsoPerKatha,
+                bigha: (sotangsoVal * 435.6) / 14400.0,
+                totalPrice: computeTotalPrice(computedRes, landPrice, priceUnit),
+              };
+              setHistoryList((prev) => [historyItem, ...prev]);
+            }}
+          />
+        </div>
       )}
 
       {/* AI Assistant Tab */}
       {activeTab === 'AI_ASSISTANT' && (
-        <LandAiChat lang={lang} apiKey={geminiApiKey} />
+        <div key="AI_ASSISTANT" className="tab-content-enter">
+          <LandAiChat lang={lang} apiKey={geminiApiKey} />
+        </div>
       )}
 
       {/* History & Price Tab */}
       {activeTab === 'HISTORY' && (
-        <HistoryTab
-          historyList={historyList}
-          onClearHistory={() => setHistoryList([])}
-          onDeleteHistoryItem={(id) => setHistoryList((prev) => prev.filter((item) => item.id !== id))}
-          landPrice={landPrice}
-          onLandPriceChange={setLandPrice}
-          priceUnit={priceUnit}
-          onPriceUnitChange={setPriceUnit}
-          sotangsoPerKatha={sotangsoPerKatha}
-          lang={lang}
-        />
+        <div key="HISTORY" className="tab-content-enter">
+          <HistoryTab
+            historyList={historyList}
+            onClearHistory={() => setHistoryList([])}
+            onDeleteHistoryItem={(id) => setHistoryList((prev) => prev.filter((item) => item.id !== id))}
+            landPrice={landPrice}
+            onLandPriceChange={setLandPrice}
+            priceUnit={priceUnit}
+            onPriceUnitChange={setPriceUnit}
+            sotangsoPerKatha={sotangsoPerKatha}
+            lang={lang}
+          />
+        </div>
       )}
 
       {/* Modals */}
@@ -758,6 +827,7 @@ export const App: React.FC = () => {
           setIsSettingsOpen(false);
           setIsDeveloperOpen(true);
         }}
+        currentUser={currentUser}
       />
 
       <CalculationResultModal
@@ -800,6 +870,9 @@ export const App: React.FC = () => {
           setCurrentUser(null);
         }}
       />
+
+      {/* Global Toast & Error Popup */}
+      <GlobalErrorPopup lang={lang} />
     </div>
   );
 };

@@ -11,6 +11,7 @@ import {
   Calculator,
   Layers,
   Sparkles,
+  FileText,
 } from 'lucide-react';
 import { AppLanguage, AppUnit, PriceUnit, KhatianPartner } from '../../types';
 import { getTranslation } from '../../lib/translations';
@@ -24,6 +25,7 @@ import {
 } from '../../lib/calculations';
 import { SkeuoCard } from '../skeuomorphic/SkeuoCard';
 import { SkeuoUnitRocker } from '../skeuomorphic/SkeuoUnitRocker';
+import { KhatianResultModal } from '../modals/KhatianResultModal';
 import { sound } from '../../lib/sound';
 import confetti from 'canvas-confetti';
 
@@ -48,6 +50,14 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
 }) => {
   // Mode: SINGLE person (Default, exact Image 1) or MULTI partner distribution
   const [calcMode, setCalcMode] = useState<'SINGLE' | 'MULTI'>('SINGLE');
+
+  // Survey Meta States
+  const [khatianNo, setKhatianNo] = useState<string>('');
+  const [daagNo, setDaagNo] = useState<string>('');
+  const [mouza, setMouza] = useState<string>('');
+
+  // Result & Receipt Modal State
+  const [isResultModalOpen, setIsResultModalOpen] = useState<boolean>(false);
 
   // Single Person Share States (Matching Image 1)
   const [singleTotalAcre, setSingleTotalAcre] = useState<string>('');
@@ -96,7 +106,8 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
 
   // Single Person Calculations
   const parsedTotalAcre = parseFloat(singleTotalAcre) || 0;
-  const parsedPersonShare = parseFloat(singlePersonShare) || 0;
+  const parsedPersonShare =
+    singlePersonShare.trim() !== '' ? parseFloat(singlePersonShare) || 0 : parsedTotalAcre > 0 ? 1.0 : 0;
 
   // Formula:
   // Land in Acre = Total Acre * Share
@@ -122,6 +133,7 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
   const handleCalculateSingle = () => {
     sound.playBeep();
     setHasCalculated(true);
+    setIsResultModalOpen(true);
     try {
       confetti({
         particleCount: 50,
@@ -156,7 +168,7 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
 
   const handlePrintSingle = () => {
     sound.playClick();
-    window.print();
+    setIsResultModalOpen(true);
   };
 
   const handleSaveSingle = () => {
@@ -235,7 +247,7 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
 
   const handlePrintMulti = () => {
     sound.playClick();
-    window.print();
+    setIsResultModalOpen(true);
   };
 
   const handleCopyMulti = () => {
@@ -316,10 +328,60 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '16px',
-                maxWidth: '440px',
+                maxWidth: '460px',
                 marginInline: 'auto',
               }}
             >
+              {/* Survey Metadata: Khatian No, Daag No, Mouza */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '8px',
+                  marginBottom: '6px',
+                }}
+              >
+                <input
+                  type="text"
+                  value={khatianNo}
+                  onChange={(e) => setKhatianNo(e.target.value)}
+                  placeholder={lang === 'BN' ? 'খতিয়ান নং (ঐচ্ছিক)' : 'Khatian No (Optional)'}
+                  className="skeuo-input"
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '12px',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                  }}
+                />
+                <input
+                  type="text"
+                  value={daagNo}
+                  onChange={(e) => setDaagNo(e.target.value)}
+                  placeholder={lang === 'BN' ? 'দাগ নং (ঐচ্ছিক)' : 'Daag No (Optional)'}
+                  className="skeuo-input"
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '12px',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                  }}
+                />
+                <input
+                  type="text"
+                  value={mouza}
+                  onChange={(e) => setMouza(e.target.value)}
+                  placeholder={lang === 'BN' ? 'মৌজা (ঐচ্ছিক)' : 'Mouza (Optional)'}
+                  className="skeuo-input"
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '12px',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                  }}
+                />
+              </div>
+
               {/* Input 1: খতিয়ানের মোট জমি (একর) */}
               <div>
                 <input
@@ -358,7 +420,7 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
                     if (!hasCalculated) setHasCalculated(true);
                   }}
                   placeholder={
-                    lang === 'BN' ? 'ব্যক্তির অংশ (যেমন: ০.০০৭)' : "Person's Share (e.g. 0.007)"
+                    lang === 'BN' ? 'ব্যক্তির অংশ (ঐচ্ছিক, ডিফল্ট ১.০০০)' : "Person's Share (Optional, e.g. 0.25)"
                   }
                   className="skeuo-input"
                   style={{
@@ -600,38 +662,32 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
                 </div>
               )}
 
-              {/* Formula Step-by-Step Breakdown */}
-              <div
+              {/* View Full 1-Page A4 Receipt Modal Button (No formulas, pure calculations) */}
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setIsResultModalOpen(true);
+                }}
+                className="skeuo-btn skeuo-btn-green"
                 style={{
-                  fontSize: '12px',
-                  color: 'var(--text-muted)',
-                  lineHeight: 1.7,
-                  background: 'var(--surface-plate)',
-                  padding: '12px 14px',
-                  borderRadius: '12px',
+                  width: '100%',
                   marginBottom: '16px',
-                  border: '1px solid var(--border-rim)',
+                  padding: '12px 16px',
+                  fontSize: '13.5px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
                 }}
               >
-                <div style={{ fontWeight: 800, color: '#1B5E20', marginBottom: '4px' }}>
-                  {lang === 'BN' ? '📌 গাণিতিক সূত্র ও ব্যাখ্যা:' : '📌 Calculation Formula:'}
-                </div>
-                <div>
-                  • {lang === 'BN' ? '১ একর = ১০০ শতক / শতাংশ' : '1 Acre = 100 Sotangso (Decimals)'}
-                </div>
-                <div>
-                  •{' '}
+                <FileText size={17} />
+                <span>
                   {lang === 'BN'
-                    ? `ব্যক্তির জমি (একর) = মোট জমি (${singleTotalAcre || '০'} একর) × ব্যক্তির অংশ (${singlePersonShare || '০'}) = ${singlePersonAcre.toFixed(4)} একর`
-                    : `Person's Land (Acre) = Total (${singleTotalAcre || '0'} Acre) × Share (${singlePersonShare || '0'}) = ${singlePersonAcre.toFixed(4)} Acre`}
-                </div>
-                <div>
-                  •{' '}
-                  {lang === 'BN'
-                    ? `ব্যক্তির জমি (শতাংশ) = ${singlePersonAcre.toFixed(4)} একর × ১০০ = ${singlePersonSotangso.toFixed(4)} শতক`
-                    : `Person's Land (Sotangso) = ${singlePersonAcre.toFixed(4)} Acre × 100 = ${singlePersonSotangso.toFixed(4)} Sotangso`}
-                </div>
-              </div>
+                    ? '📜 পূর্ণাঙ্গ রসিদ ও সার্টিফিকেট দেখুন (প্রিন্ট / PDF / JPG)'
+                    : '📜 View Official Receipt (Print / PDF / JPG)'}
+                </span>
+              </button>
 
               {/* Action Buttons: Copy, Print, Save to History */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
@@ -785,6 +841,57 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
                   {getTranslation('mode_traditional', lang)}
                 </button>
               </div>
+            </div>
+
+            {/* Survey Meta Inputs: খতিয়ান নং, দাগ নং, মৌজা */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                gap: '8px',
+                marginBottom: '10px',
+                paddingTop: '6px',
+              }}
+            >
+              <input
+                type="text"
+                value={khatianNo}
+                onChange={(e) => setKhatianNo(e.target.value)}
+                placeholder={lang === 'BN' ? 'খতিয়ান নং (ঐচ্ছিক)' : 'Khatian No (Optional)'}
+                className="skeuo-input"
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: '12px',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                }}
+              />
+              <input
+                type="text"
+                value={daagNo}
+                onChange={(e) => setDaagNo(e.target.value)}
+                placeholder={lang === 'BN' ? 'দাগ নং (ঐচ্ছিক)' : 'Daag No (Optional)'}
+                className="skeuo-input"
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: '12px',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                }}
+              />
+              <input
+                type="text"
+                value={mouza}
+                onChange={(e) => setMouza(e.target.value)}
+                placeholder={lang === 'BN' ? 'মৌজা (ঐচ্ছিক)' : 'Mouza (Optional)'}
+                className="skeuo-input"
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: '12px',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                }}
+              />
             </div>
 
             {/* Total Land Input */}
@@ -1278,6 +1385,37 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
                 </div>
               ))}
             </div>
+
+            {/* Full Multi-Partner Receipt & Certificate CTA Button */}
+            <button
+              type="button"
+              onClick={handlePrintMulti}
+              className="header-glass-btn no-print"
+              style={{
+                width: '100%',
+                marginTop: '16px',
+                padding: '14px',
+                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                color: '#FFFFFF',
+                borderRadius: '14px',
+                fontWeight: 900,
+                fontSize: '14.5px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                border: 'none',
+                boxShadow: '0 4px 14px rgba(4, 120, 87, 0.35)',
+                cursor: 'pointer',
+              }}
+            >
+              <FileText size={18} />
+              <span>
+                {lang === 'BN'
+                  ? '📜 পূর্ণাঙ্গ যৌথ বণ্টন রসিদ ও সার্টিফিকেট দেখুন (প্রিন্ট / PDF / JPG)'
+                  : '📜 View Full Distribution Receipt (Print / PDF / JPG)'}
+              </span>
+            </button>
           </SkeuoCard>
         </div>
       )}
@@ -1318,6 +1456,41 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
           </span>
         </button>
       </div>
+
+      {/* Khatian Official 1-Page A4 Receipt & Calculation Modal */}
+      <KhatianResultModal
+        isOpen={isResultModalOpen}
+        onClose={() => setIsResultModalOpen(false)}
+        lang={lang}
+        mode={calcMode}
+        khatianNo={khatianNo}
+        daagNo={daagNo}
+        mouza={mouza}
+        landPrice={landPrice}
+        priceUnit={priceUnit}
+        sotangsoPerKatha={sotangsoPerKatha}
+        singleData={{
+          totalAcre: singleTotalAcre,
+          personShare: singlePersonShare.trim() !== '' ? singlePersonShare : (parsedTotalAcre > 0 ? '১.০০০ (পূর্ণ অংশ)' : '০'),
+          sotangso: singlePersonSotangso,
+          katha: singlePersonKatha,
+          bigha: singlePersonBigha,
+          acre: singlePersonAcre,
+          sqFt: singlePersonSqFt,
+          sqM: singlePersonSqM,
+          price: singlePersonPrice,
+        }}
+        multiData={{
+          totalLand,
+          totalLandUnit,
+          totalSotangso,
+          totalSqFt: totalSotangso * SQ_FT_PER_SOTANGSO,
+          totalKatha: totalSotangso / sotangsoPerKatha,
+          totalBigha: (totalSotangso * SQ_FT_PER_SOTANGSO) / SQ_FT_PER_BIGHA,
+          totalPrice: totalSotangso * landPrice,
+          partners: partnerResults,
+        }}
+      />
     </div>
   );
 };
