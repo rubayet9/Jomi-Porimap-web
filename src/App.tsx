@@ -33,6 +33,7 @@ import { ShapeSelector } from './components/calculator/ShapeSelector';
 import { ShapeBlueprint } from './components/calculator/ShapeBlueprint';
 import { DimensionInputs } from './components/calculator/DimensionInputs';
 import { FreeformCanvas } from './components/calculator/FreeformCanvas';
+import { LandValuationCard } from './components/calculator/LandValuationCard';
 import { TriangulationTab } from './components/triangulation/TriangulationTab';
 import { KhatianTab } from './components/khatian/KhatianTab';
 import { LandAiChat } from './components/ai/LandAiChat';
@@ -99,6 +100,8 @@ export const App: React.FC = () => {
   const [triangleMethod, setTriangleMethod] = useState<TriangleMethod>('BASE_HEIGHT');
   const [freeformPoints, setFreeformPoints] = useState<CanvasPoint[]>([]);
   const [isFreeformClosed, setIsFreeformClosed] = useState<boolean>(false);
+  const [emptyFieldKeys, setEmptyFieldKeys] = useState<string[]>([]);
+  const [showValidationSignal, setShowValidationSignal] = useState<boolean>(false);
 
   // Calculation Result
   const [result, setResult] = useState<CalculationResult>(() =>
@@ -219,6 +222,13 @@ export const App: React.FC = () => {
   const handleInputChange = (key: string, value: string) => {
     const updated = { ...inputs, [key]: value };
     setInputs(updated);
+    if (parseFloat(value) > 0) {
+      setEmptyFieldKeys((prev) => {
+        const next = prev.filter((k) => k !== key);
+        if (next.length === 0) setShowValidationSignal(false);
+        return next;
+      });
+    }
   };
 
   const getVal = (key: string, currentInputs: Record<string, string> = inputs): number => {
@@ -407,7 +417,89 @@ export const App: React.FC = () => {
     }
   };
 
+  const getRequiredFields = (
+    shape: LandShape,
+    triMethod: TriangleMethod,
+    currentInputs: Record<string, string>
+  ): string[] => {
+    switch (shape) {
+      case 'RECTANGLE':
+        return ['length_1', 'length_2', 'width_1', 'width_2'];
+      case 'SQUARE':
+        if (parseFloat(currentInputs['side']) > 0) return ['side'];
+        if (
+          currentInputs['side_1'] ||
+          currentInputs['side_2'] ||
+          currentInputs['side_3'] ||
+          currentInputs['side_4']
+        ) {
+          return ['side_1', 'side_2', 'side_3', 'side_4'];
+        }
+        return ['side'];
+      case 'TRIANGLE':
+        return triMethod === 'BASE_HEIGHT' ? ['base', 'height'] : ['side_a', 'side_b', 'side_c'];
+      case 'RHOMBUS':
+        return ['diag_1', 'diag_2'];
+      case 'PARALLELOGRAM':
+        return ['base', 'height'];
+      case 'TRAPEZIUM':
+        return ['side_a', 'side_b', 'height'];
+      case 'QUADRILATERAL':
+        return ['side_a', 'side_b', 'side_c', 'side_d', 'diag_e'];
+      case 'PENTAGON':
+        return ['side_1', 'side_2', 'side_3', 'side_4', 'side_5'];
+      case 'HEXAGON':
+        if (parseFloat(currentInputs['side']) > 0) return ['side'];
+        if (
+          currentInputs['side_1'] ||
+          currentInputs['side_2'] ||
+          currentInputs['side_3'] ||
+          currentInputs['side_4'] ||
+          currentInputs['side_5'] ||
+          currentInputs['side_6']
+        ) {
+          return ['side_1', 'side_2', 'side_3', 'side_4', 'side_5', 'side_6'];
+        }
+        return ['side'];
+      case 'CUBE':
+        return ['side', 'depth'];
+      default:
+        return [];
+    }
+  };
+
   const handleManualCalculate = () => {
+    if (selectedShape === 'FREEFORM') {
+      if (freeformPoints.length < 3) {
+        sound.playReset();
+        return;
+      }
+      calculateArea(selectedShape, inputs, unit, triangleMethod, freeformPoints, true);
+      setIsResultModalOpen(true);
+      return;
+    }
+
+    const requiredKeys = getRequiredFields(selectedShape, triangleMethod, inputs);
+    const missingKeys = requiredKeys.filter((key) => {
+      const val = parseFloat(inputs[key]);
+      return isNaN(val) || val <= 0;
+    });
+
+    if (missingKeys.length > 0) {
+      sound.playReset();
+      setEmptyFieldKeys(missingKeys);
+      setShowValidationSignal(true);
+
+      const firstInput = document.getElementById(`input-${missingKeys[0]}`);
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    setEmptyFieldKeys([]);
+    setShowValidationSignal(false);
     calculateArea(selectedShape, inputs, unit, triangleMethod, freeformPoints, true);
     setIsResultModalOpen(true);
   };
@@ -415,6 +507,8 @@ export const App: React.FC = () => {
   const handleResetCalculator = () => {
     sound.playReset();
     setInputs({});
+    setEmptyFieldKeys([]);
+    setShowValidationSignal(false);
     setFreeformPoints([]);
     setIsFreeformClosed(false);
     setResult(computeLandMetrics(0, sotangsoPerKatha));
@@ -422,6 +516,8 @@ export const App: React.FC = () => {
 
   const handleShapeSelect = (shape: LandShape) => {
     setSelectedShape(shape);
+    setEmptyFieldKeys([]);
+    setShowValidationSignal(false);
     // Provide sensible default inputs based on shape
     let defaultInputs: Record<string, string> = {};
     if (shape === 'RECTANGLE') {
@@ -522,6 +618,36 @@ export const App: React.FC = () => {
             <SkeuoUnitRocker unit={unit} onUnitChange={handleUnitChange} lang={lang} />
           </div>
 
+          {/* SECTION 1: MEASUREMENT & BLUEPRINT CANVAS */}
+          <div style={{ marginTop: '8px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  color: '#FFFFFF',
+                  fontSize: '11px',
+                  fontWeight: 900,
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)',
+                  letterSpacing: '0.4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <span>📐</span>
+                <span>{lang === 'BN' ? 'ধাপ ১' : 'STEP 1'}</span>
+              </div>
+              <h2 style={{ fontSize: '15.5px', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+                {lang === 'BN' ? 'জমির পরিমাপ ও ড্রাফটিং নকশা' : 'Land Measurement & Blueprint Canvas'}
+              </h2>
+            </div>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              {lang === 'BN' ? 'সঠিক মাপ ইনপুট দিয়ে ক্ষেত্রফল নির্ণয় করুন' : 'Enter dimensions to calculate land area'}
+            </span>
+          </div>
+
           {/* Blueprint Canvas & Dynamic Inputs Grid with Smooth Shape Transition */}
           <div
             key={`${selectedShape}-${unit}`}
@@ -585,42 +711,15 @@ export const App: React.FC = () => {
             {selectedShape !== 'FREEFORM' && (
               <SkeuoCard showScrews style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
-                  <div style={{ marginBottom: '14px', fontSize: '14px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>✏️</span>
-                      <span>{getTranslation('input_fields', lang)}</span>
-                    </div>
-
-                    <button
-                      type="button"
-                      id="clear-inputs-header-btn"
-                      onClick={handleResetCalculator}
-                      className="header-glass-btn"
-                      title={lang === 'BN' ? 'সব পরিমাপ ইনপুট মুছে ফেলুন' : 'Reset all inputs'}
-                      style={{
-                        padding: '6px 14px',
-                        fontSize: '12.5px',
-                        fontWeight: 800,
-                        color: '#EF4444',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.18) 100%)',
-                        border: '1.5px solid rgba(239, 68, 68, 0.4)',
-                        borderRadius: '10px',
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 6px rgba(239, 68, 68, 0.15)',
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      <RotateCcw size={14} />
-                      <span>{lang === 'BN' ? 'মুছে ফেলুন' : 'Clear'}</span>
-                    </button>
+                  <div style={{ marginBottom: '14px', fontSize: '14px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>✏️</span>
+                    <span>{getTranslation('input_fields', lang)}</span>
                   </div>
 
                   <DimensionInputs
                     shape={selectedShape}
                     inputs={inputs}
+                    emptyFields={emptyFieldKeys}
                     onInputChange={handleInputChange}
                     triangleMethod={triangleMethod}
                     onTriangleMethodChange={(m) => {
@@ -631,6 +730,34 @@ export const App: React.FC = () => {
                     lang={lang}
                   />
                 </div>
+
+                {/* Empty field reminder / signal alert banner */}
+                {showValidationSignal && (
+                  <div
+                    className="input-field-shake"
+                    style={{
+                      marginTop: '16px',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      border: '1.5px solid #EF4444',
+                      color: '#DC2626',
+                      fontSize: '13px',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 8px rgba(239, 68, 68, 0.15)',
+                    }}
+                  >
+                    <AlertCircle size={18} color="#DC2626" style={{ flexShrink: 0 }} />
+                    <span>
+                      {lang === 'BN'
+                        ? '⚠️ অনুগ্রহ করে লাল চিহ্নিত ফাঁকা ঘরগুলোতে সঠিক পরিমাপ লিখুন!'
+                        : '⚠️ Please enter valid measurements in the highlighted fields!'}
+                    </span>
+                  </div>
+                )}
 
                 <div style={{ marginTop: '24px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <div style={{ flex: 1 }}>
@@ -676,20 +803,66 @@ export const App: React.FC = () => {
             )}
           </div>
 
-          {/* Formula & Theory Card */}
-          <SkeuoCard style={{ padding: '16px 20px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <BookOpen size={18} color="#2E7D32" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <div>
-                <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#1B5E20', marginBottom: '2px' }}>
-                  {getTranslation('formula', lang)}:
-                </h4>
-                <p style={{ fontSize: '12px', color: 'var(--text-main)', fontFamily: 'Outfit, Hind Siliguri, sans-serif' }}>
-                  {getFormulaText()}
-                </p>
+          {/* SECTION 2 SEPARATOR & BANNER */}
+          <div style={{ margin: '36px 0 16px 0', position: 'relative' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '6px',
+              }}
+            >
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                  color: '#FFFFFF',
+                  fontSize: '11px',
+                  fontWeight: 900,
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 8px rgba(245, 158, 11, 0.35)',
+                  letterSpacing: '0.4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <span>💰</span>
+                <span>{lang === 'BN' ? 'ধাপ ২' : 'STEP 2'}</span>
               </div>
+              <h2 style={{ fontSize: '15.5px', fontWeight: 800, color: '#B45309', margin: 0 }}>
+                {lang === 'BN' ? 'জমির আর্থিক মূল্যায়ন ও মোট বাজার দর' : 'Land Valuation & Total Market Value'}
+              </h2>
+              <div
+                style={{
+                  flex: 1,
+                  height: '1.5px',
+                  background: 'linear-gradient(90deg, rgba(245, 158, 11, 0.45) 0%, rgba(245, 158, 11, 0.05) 100%)',
+                }}
+              />
             </div>
-          </SkeuoCard>
+            <p style={{ margin: '0 0 14px 0', fontSize: '12px', color: 'var(--text-muted)' }}>
+              {lang === 'BN'
+                ? 'পরিমাপকৃত জমির মোট শতক/কাঠা বা যেকোনো পরিমাণের ভিত্তিতে সরাসরি মোট মূল্য হিসাব করুন'
+                : 'Calculate total purchase or sale price based on current measured area or custom amount'}
+            </p>
+          </div>
+
+          {/* Land Valuation & Pricing Calculator (inside Calculator Tab) */}
+          <LandValuationCard
+            currentSotangso={result.sotangso}
+            currentKatha={result.katha}
+            currentBigha={result.bigha}
+            landPrice={landPrice}
+            onLandPriceChange={setLandPrice}
+            priceUnit={priceUnit}
+            onPriceUnitChange={setPriceUnit}
+            sotangsoPerKatha={sotangsoPerKatha}
+            lang={lang}
+          />
+
+          {/* Calculation Formula card hidden per user request */}
         </div>
       )}
 

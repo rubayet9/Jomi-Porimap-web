@@ -262,9 +262,10 @@ ${result.cubeVolume ? `• মাটির আয়তন (CFT): ${formatNumber
 
         {/* 4 Traditional Bangladesh Land Gauges */}
         <div
+          className="lcd-gauges-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))',
             gap: '8px',
             paddingTop: '12px',
             borderTop: '1px solid rgba(78, 250, 138, 0.18)',

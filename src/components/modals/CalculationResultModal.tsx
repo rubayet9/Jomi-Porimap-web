@@ -224,7 +224,79 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
   const handlePrint = () => {
     sound.playClick();
-    window.print();
+    const element = printableRef.current;
+    if (!element) {
+      window.print();
+      return;
+    }
+
+    // Create an isolated iframe for clean, reliable 1-page receipt printing without website chrome
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document;
+    if (!doc) {
+      window.print();
+      return;
+    }
+
+    // Inherit styles & fonts from main window
+    const styleLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+      .map((el) => el.outerHTML)
+      .join('\n');
+
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Jomi Porimap Certificate - ${receiptId}</title>
+          ${styleLinks}
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 8mm 10mm;
+            }
+            html, body {
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #FFFFFF !important;
+              color: #111827 !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              font-family: 'Hind Siliguri', 'Outfit', sans-serif !important;
+            }
+            #survey-printable-receipt {
+              display: block !important;
+              width: 100% !important;
+              margin: 0 auto !important;
+              box-sizing: border-box !important;
+              box-shadow: none !important;
+            }
+          </style>
+        </head>
+        <body>
+          ${element.outerHTML}
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    iframe.contentWindow?.focus();
+    setTimeout(() => {
+      iframe.contentWindow?.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1500);
+    }, 300);
   };
 
   // Production-grade: capture printable element to canvas with reliable rendering
@@ -256,35 +328,23 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
       const canvas = await capturePrintableCanvas();
       const safeName = `Jomi_Porimap_Roshid_${receiptId}.pdf`;
 
+      // Proper sizing: Fit PDF page dimensions proportionally to the receipt content
+      // with standard 8mm margins all around, eliminating massive top/bottom empty gaps
+      const marginMm = 8;
+      const pageWMm = 210; // Standard 210mm width (A4 width)
+      const drawWMm = pageWMm - marginMm * 2; // 194mm content width
+      const imgAspect = canvas.height / canvas.width;
+      const drawHMm = drawWMm * imgAspect;
+      const pageHMm = drawHMm + marginMm * 2; // Exact proportional page height
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4',
+        format: [pageWMm, pageHMm],
         compress: true,
       });
 
-      const pageW = 210;
-      const pageH = 297;
-      const margin = 8;
-      const maxW = pageW - margin * 2;
-      const maxH = pageH - margin * 2;
-
-      // Calculate proportional image dimensions
-      const imgAspect = canvas.height / canvas.width;
-      let drawW = maxW;
-      let drawH = drawW * imgAspect;
-
-      // Scale down to fit within EXACTLY one page if too tall
-      if (drawH > maxH) {
-        drawH = maxH;
-        drawW = drawH / imgAspect;
-      }
-
-      // Center horizontally and vertically
-      const posX = (pageW - drawW) / 2;
-      const posY = (pageH - drawH) / 2;
-
-      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', posX, posY, drawW, drawH, undefined, 'FAST');
+      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', marginMm, marginMm, drawWMm, drawHMm, undefined, 'FAST');
       pdf.save(safeName);
 
       sound.playBeep();
@@ -307,45 +367,38 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
       const canvas = await capturePrintableCanvas();
       const safeName = `Jomi_Porimap_Roshid_${receiptId}.jpg`;
 
-      // Create crisp A4-proportioned canvas (210:297 ratio) with white background
-      const a4Width = 1600;
-      const a4Height = Math.round(a4Width * (297 / 210)); // 2263px
+      // Proper sizing: Fit canvas to the exact captured certificate height + balanced framing margin
+      // Eliminates massive vertical empty space above and below the certificate
+      const margin = 28;
+      const finalWidth = canvas.width + margin * 2;
+      const finalHeight = canvas.height + margin * 2;
 
-      const a4Canvas = document.createElement('canvas');
-      a4Canvas.width = a4Width;
-      a4Canvas.height = a4Height;
-      const ctx = a4Canvas.getContext('2d');
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = finalWidth;
+      exportCanvas.height = finalHeight;
+      const ctx = exportCanvas.getContext('2d');
       if (!ctx) throw new Error('Canvas 2D context unavailable');
 
       // Pure solid white background
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, a4Width, a4Height);
+      ctx.fillRect(0, 0, finalWidth, finalHeight);
 
-      // Certificate decorative borders
+      // Certificate decorative borders (evenly balanced on all 4 sides)
       ctx.strokeStyle = '#064E3B';
       ctx.lineWidth = 4;
-      ctx.strokeRect(32, 32, a4Width - 64, a4Height - 64);
+      ctx.strokeRect(10, 10, finalWidth - 20, finalHeight - 20);
 
       ctx.strokeStyle = '#10B981';
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(40, 40, a4Width - 80, a4Height - 80);
+      ctx.strokeRect(16, 16, finalWidth - 32, finalHeight - 32);
 
-      // Scale captured canvas to fit within A4 margins
-      const padding = 70;
-      const maxW = a4Width - padding * 2;
-      const maxH = a4Height - padding * 2;
-      const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
-      const drawW = canvas.width * scale;
-      const drawH = canvas.height * scale;
-      const drawX = (a4Width - drawW) / 2;
-      const drawY = (a4Height - drawH) / 2;
-
-      ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, drawX, drawY, drawW, drawH);
+      // Draw the certificate precisely within the margins
+      ctx.drawImage(canvas, margin, margin, canvas.width, canvas.height);
 
       // Direct reliable download via Data URL (immune to premature revocation bugs)
       const link = document.createElement('a');
       link.download = safeName;
-      link.href = a4Canvas.toDataURL('image/jpeg', 0.95);
+      link.href = exportCanvas.toDataURL('image/jpeg', 0.95);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

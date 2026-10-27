@@ -11,6 +11,7 @@ interface DimensionInputsProps {
   onTriangleMethodChange: (method: TriangleMethod) => void;
   unit: AppUnit;
   lang: AppLanguage;
+  emptyFields?: string[];
 }
 
 export const DimensionInputs: React.FC<DimensionInputsProps> = ({
@@ -21,23 +22,58 @@ export const DimensionInputs: React.FC<DimensionInputsProps> = ({
   onTriangleMethodChange,
   unit,
   lang,
+  emptyFields = [],
 }) => {
   const unitLabel = unit === 'FEET' ? 'ft' : 'm';
 
   const renderField = (key: string, labelKey: string, placeholder?: string) => {
+    const isError = emptyFields.includes(key);
     return (
-      <div style={{ flex: '1 1 180px', minWidth: '140px' }}>
-        <label className="field-label">
-          {getTranslation(labelKey, lang)} ({unitLabel})
-        </label>
+      <div
+        style={{ flex: '1 1 180px', minWidth: '140px' }}
+        className={isError ? 'input-field-shake' : ''}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <label className="field-label" style={{ color: isError ? '#DC2626' : undefined, margin: 0 }}>
+            {getTranslation(labelKey, lang)} ({unitLabel})
+          </label>
+          {isError && (
+            <span
+              style={{
+                fontSize: '10.5px',
+                fontWeight: 800,
+                color: '#DC2626',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                background: '#FEE2E2',
+                padding: '1px 6px',
+                borderRadius: '4px',
+              }}
+            >
+              ⚠️ {lang === 'BN' ? 'মান লিখুন' : 'Required'}
+            </span>
+          )}
+        </div>
         <div style={{ position: 'relative' }}>
           <input
+            id={`input-${key}`}
             type="number"
             step="any"
             value={inputs[key] || ''}
             onChange={(e) => onInputChange(key, e.target.value)}
-            placeholder={placeholder || '0.00'}
-            className="skeuo-input"
+            placeholder={placeholder || (lang === 'BN' ? 'মান লিখুন...' : '0.00')}
+            className={`skeuo-input ${isError ? 'input-error-signal' : ''}`}
+            style={
+              isError
+                ? {
+                    borderColor: '#EF4444',
+                    boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.25)',
+                    backgroundColor: '#FEF2F2',
+                    color: '#991B1B',
+                  }
+                : undefined
+            }
           />
           <span
             style={{
@@ -47,7 +83,7 @@ export const DimensionInputs: React.FC<DimensionInputsProps> = ({
               transform: 'translateY(-50%)',
               fontSize: '11px',
               fontWeight: 800,
-              color: 'var(--text-muted)',
+              color: isError ? '#EF4444' : 'var(--text-muted)',
               pointerEvents: 'none',
             }}
           >

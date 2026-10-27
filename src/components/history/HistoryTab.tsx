@@ -33,53 +33,9 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({
   historyList,
   onClearHistory,
   onDeleteHistoryItem,
-  landPrice,
-  onLandPriceChange,
-  priceUnit,
-  onPriceUnitChange,
-  sotangsoPerKatha,
   lang,
 }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  // Valuation Calculator Inputs
-  const [calcAmount, setCalcAmount] = useState<string>('5.0');
-  const [calcLandUnit, setCalcLandUnit] = useState<PriceUnit>('SOTANGSO');
-  const [calcUnitPrice, setCalcUnitPrice] = useState<string>(String(landPrice || 50000));
-  const [calcPriceUnit, setCalcPriceUnit] = useState<PriceUnit>(priceUnit);
-
-  // Calculate live valuation
-  const computePriceValuation = () => {
-    const amount = parseFloat(calcAmount) || 0;
-    const price = parseFloat(calcUnitPrice) || 0;
-
-    // Convert land amount to Sq.Ft
-    const landSqFt =
-      calcLandUnit === 'SOTANGSO'
-        ? amount * 435.6
-        : calcLandUnit === 'KATHA'
-        ? amount * sotangsoPerKatha * 435.6
-        : amount * 14400.0;
-
-    // Convert price to price per Sq.Ft
-    const pricePerSqFt =
-      calcPriceUnit === 'SOTANGSO'
-        ? price / 435.6
-        : calcPriceUnit === 'KATHA'
-        ? price / (sotangsoPerKatha * 435.6)
-        : price / 14400.0;
-
-    return landSqFt * pricePerSqFt;
-  };
-
-  const totalPrice = computePriceValuation();
-
-  const handleApplyGlobalPrice = () => {
-    sound.playClick();
-    const price = parseFloat(calcUnitPrice) || 0;
-    onLandPriceChange(price);
-    onPriceUnitChange(calcPriceUnit);
-  };
 
   const handleCopyItem = (item: CalculationHistoryItem) => {
     sound.playClick();
@@ -104,123 +60,9 @@ ${item.totalPrice ? `• মূল্য: ${formatBDT(item.totalPrice)}` : ''}`;
     }
   };
 
-  const unitLabels = {
-    SOTANGSO: lang === 'BN' ? 'শতাংশ' : 'Sotangso',
-    KATHA: lang === 'BN' ? 'কাঠা' : 'Katha',
-    BIGHA: lang === 'BN' ? 'বিঘা' : 'Bigha',
-  };
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* 1. LAND VALUATION & PRICING CALCULATOR */}
-      <SkeuoCard showScrews style={{ padding: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1B5E20', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Coins size={20} color="#D4A017" />
-            <span>{getTranslation('price_title', lang)}</span>
-          </h2>
-
-          <button
-            type="button"
-            onClick={handleApplyGlobalPrice}
-            className="skeuo-btn skeuo-btn-brass"
-            style={{ padding: '7px 14px', fontSize: '12px' }}
-          >
-            <span>{lang === 'BN' ? 'অ্যাপে রেট সেট করুন' : 'Set as App Rate'}</span>
-          </button>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
-          {/* Land Amount */}
-          <div>
-            <label className="field-label">{getTranslation('land_amount', lang)}</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input
-                type="number"
-                step="any"
-                value={calcAmount}
-                onChange={(e) => setCalcAmount(e.target.value)}
-                className="skeuo-input"
-                style={{ flex: 1 }}
-              />
-              <select
-                value={calcLandUnit}
-                onChange={(e) => setCalcLandUnit(e.target.value as PriceUnit)}
-                className="skeuo-input"
-                style={{ width: '110px' }}
-              >
-                <option value="SOTANGSO">{unitLabels.SOTANGSO}</option>
-                <option value="KATHA">{unitLabels.KATHA}</option>
-                <option value="BIGHA">{unitLabels.BIGHA}</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Unit Price */}
-          <div>
-            <label className="field-label">{getTranslation('unit_price', lang)}</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input
-                type="number"
-                step="any"
-                value={calcUnitPrice}
-                onChange={(e) => setCalcUnitPrice(e.target.value)}
-                className="skeuo-input"
-                style={{ flex: 1 }}
-              />
-              <select
-                value={calcPriceUnit}
-                onChange={(e) => setCalcPriceUnit(e.target.value as PriceUnit)}
-                className="skeuo-input"
-                style={{ width: '110px' }}
-              >
-                <option value="SOTANGSO">/{unitLabels.SOTANGSO}</option>
-                <option value="KATHA">/{unitLabels.KATHA}</option>
-                <option value="BIGHA">/{unitLabels.BIGHA}</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Calculated Total Price Banner */}
-        <div
-          style={{
-            marginTop: '16px',
-            padding: '16px 20px',
-            borderRadius: '14px',
-            background: 'linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 100%)',
-            border: '2px solid #81C784',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '12px',
-          }}
-        >
-          <div>
-            <div style={{ fontSize: '12px', fontWeight: 800, color: '#1B5E20' }}>
-              {getTranslation('total_price', lang)}:
-            </div>
-            <div
-              style={{
-                fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
-                fontWeight: 900,
-                color: '#2E7D32',
-                fontFamily: 'Outfit, sans-serif',
-              }}
-            >
-              {formatBDT(totalPrice)}
-            </div>
-          </div>
-
-          <div style={{ fontSize: '11px', color: '#1B5E20', textAlign: 'right' }}>
-            <div>{calcAmount} {unitLabels[calcLandUnit]} @ ৳ {formatNumber(parseFloat(calcUnitPrice) || 0, 0)}/{unitLabels[calcPriceUnit]}</div>
-            <div style={{ fontWeight: 800 }}>({(totalPrice / (parseFloat(calcAmount) || 1)).toFixed(0)} BDT / Unit)</div>
-          </div>
-        </div>
-      </SkeuoCard>
-
-      {/* 2. SAVED CALCULATION HISTORY */}
+      {/* SAVED CALCULATION HISTORY */}
       <SkeuoCard showScrews style={{ padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>

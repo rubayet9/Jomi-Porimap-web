@@ -107,7 +107,7 @@ export const translations: Record<AppLanguage, Record<string, string>> = {
     tab_triangulation: 'Triangulation',
     tab_khatian: 'Khatian Share',
     tab_ai: 'Digital Amin AI',
-    tab_history: 'History & Price',
+    tab_history: 'History',
 
     // Triangulation
     triangulation_title: 'Triangulation Survey Method',
@@ -325,7 +325,7 @@ export const translations: Record<AppLanguage, Record<string, string>> = {
     tab_triangulation: 'ত্রিভুজায়ন',
     tab_khatian: 'খতিয়ান হিস্যা',
     tab_ai: 'ডিজিটাল আমিন AI',
-    tab_history: 'হিস্ট্রি ও দর',
+    tab_history: 'হিস্ট্রি',
 
     // Triangulation
     triangulation_title: 'ত্রিভুজায়ন পদ্ধতি (সবচেয়ে নির্ভুল)',
