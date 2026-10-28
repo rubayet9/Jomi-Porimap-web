@@ -183,7 +183,7 @@ export const LandValuationCard: React.FC<LandValuationCardProps> = ({
                   background: 'rgba(46, 125, 50, 0.1)',
                   border: '1px solid rgba(46, 125, 50, 0.25)',
                   borderRadius: '6px',
-                  padding: '2px 7px',
+                  padding: '3px 8px',
                   fontSize: '11px',
                   fontWeight: 700,
                   color: '#1B5E20',
@@ -191,7 +191,9 @@ export const LandValuationCard: React.FC<LandValuationCardProps> = ({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
+                  whiteSpace: 'nowrap',
                   transition: 'all 0.15s ease',
+                  flexShrink: 0,
                 }}
               >
                 <Sparkles size={11} color="#2E7D32" />
@@ -216,8 +218,8 @@ export const LandValuationCard: React.FC<LandValuationCardProps> = ({
             <select
               value={calcLandUnit}
               onChange={(e) => setCalcLandUnit(e.target.value as PriceUnit)}
-              className="skeuo-input"
-              style={{ width: '110px' }}
+              className="skeuo-input valuation-unit-select"
+              style={{ width: '126px', flexShrink: 0 }}
             >
               <option value="SOTANGSO">{unitLabels.SOTANGSO}</option>
               <option value="KATHA">{unitLabels.KATHA}</option>
@@ -242,8 +244,8 @@ export const LandValuationCard: React.FC<LandValuationCardProps> = ({
             <select
               value={calcPriceUnit}
               onChange={(e) => setCalcPriceUnit(e.target.value as PriceUnit)}
-              className="skeuo-input"
-              style={{ width: '110px' }}
+              className="skeuo-input valuation-unit-select"
+              style={{ width: '126px', flexShrink: 0 }}
             >
               <option value="SOTANGSO">/{unitLabels.SOTANGSO}</option>
               <option value="KATHA">/{unitLabels.KATHA}</option>
@@ -267,7 +269,7 @@ export const LandValuationCard: React.FC<LandValuationCardProps> = ({
               type="button"
               id="clear-valuation-btn"
               onClick={handleClearValuation}
-              className="skeuo-btn"
+              className="valuation-action-btn"
               title={lang === 'BN' ? 'মূল্যায়ন ঘরগুলো খালি করুন' : 'Clear valuation fields'}
               style={{
                 padding: '6px 12px',
@@ -282,6 +284,7 @@ export const LandValuationCard: React.FC<LandValuationCardProps> = ({
                 border: '1px solid rgba(239, 68, 68, 0.4)',
                 boxShadow: '0 2px 4px rgba(220, 38, 38, 0.12)',
                 cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               <Trash2 size={13} color="#DC2626" />
@@ -293,7 +296,7 @@ export const LandValuationCard: React.FC<LandValuationCardProps> = ({
               type="button"
               id="set-app-rate-btn"
               onClick={handleApplyGlobalPrice}
-              className="skeuo-btn skeuo-btn-brass"
+              className="valuation-action-btn"
               title={lang === 'BN' ? 'এই দর অ্যাপের সব জায়গায় সেট করুন' : 'Apply rate across app'}
               style={{
                 padding: '6px 12px',
@@ -303,7 +306,12 @@ export const LandValuationCard: React.FC<LandValuationCardProps> = ({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
+                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                border: '1px solid rgba(245, 158, 11, 0.5)',
                 boxShadow: '0 2px 6px rgba(180, 83, 9, 0.25)',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               {rateApplied ? <Check size={13} /> : null}

@@ -16,6 +16,9 @@ import {
   ChevronRight,
   Calculator,
   Search,
+  Printer,
+  FileDown,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { AppLanguage, CalculationHistoryItem } from '../../types';
 import { auth, signOut, updateProfile, FirebaseUser } from '../../lib/firebase';
@@ -31,6 +34,7 @@ interface UserProfileModalProps {
   historyList: CalculationHistoryItem[];
   onDeleteHistoryItem?: (id: string) => void;
   onClearHistory?: () => void;
+  onViewReceipt?: (item: CalculationHistoryItem, autoAction?: 'PRINT' | 'PDF' | 'JPG') => void;
   onLogout: () => void;
 }
 
@@ -42,6 +46,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   historyList,
   onDeleteHistoryItem,
   onClearHistory,
+  onViewReceipt,
   onLogout,
 }) => {
   if (!isOpen || !currentUser) return null;
@@ -458,14 +463,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       borderRadius: '12px',
                       border: '1px solid var(--border-rim)',
                       display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
+                      flexDirection: 'column',
                       gap: '8px',
                       transition: 'all 0.12s ease',
                     }}
                   >
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span
                           style={{
                             background: '#2E7D32',
@@ -483,53 +487,161 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px', fontWeight: 800 }}>
-                        <span style={{ color: '#1B5E20' }}>
-                          {item.sotangso.toFixed(3)} {lang === 'BN' ? 'শতাংশ' : 'Sotangso'}
-                        </span>
-                        <span style={{ color: 'var(--text-muted)' }}>•</span>
-                        <span style={{ color: 'var(--text-main)' }}>
-                          {item.katha.toFixed(3)} {lang === 'BN' ? 'কাঠা' : 'Katha'}
-                        </span>
-                        {item.totalPrice ? (
-                          <>
-                            <span style={{ color: 'var(--text-muted)' }}>•</span>
-                            <span style={{ color: '#2E7D32' }}>
-                              {formatBDT(item.totalPrice)}
-                            </span>
-                          </>
-                        ) : null}
-                      </div>
-
-                      {item.inputsDesc && (
-                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {item.inputsDesc}
-                        </div>
+                      {onDeleteHistoryItem && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playClick();
+                            onDeleteHistoryItem(item.id);
+                          }}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--text-muted)',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                          title="Delete"
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       )}
                     </div>
 
-                    {onDeleteHistoryItem && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          sound.playClick();
-                          onDeleteHistoryItem(item.id);
-                        }}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px', fontWeight: 800 }}>
+                      <span style={{ color: '#1B5E20' }}>
+                        {item.sotangso.toFixed(3)} {lang === 'BN' ? 'শতাংশ' : 'Sotangso'}
+                      </span>
+                      <span style={{ color: 'var(--text-muted)' }}>•</span>
+                      <span style={{ color: 'var(--text-main)' }}>
+                        {item.katha.toFixed(3)} {lang === 'BN' ? 'কাঠা' : 'Katha'}
+                      </span>
+                      {item.totalPrice ? (
+                        <>
+                          <span style={{ color: 'var(--text-muted)' }}>•</span>
+                          <span style={{ color: '#2E7D32' }}>
+                            {formatBDT(item.totalPrice)}
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+
+                    {item.inputsDesc && (
+                      <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {item.inputsDesc}
+                      </div>
+                    )}
+
+                    {onViewReceipt && (
+                      <div
+                        className="profile-history-actions"
                         style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: 'var(--text-muted)',
-                          cursor: 'pointer',
-                          padding: '6px',
-                          borderRadius: '6px',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
+                          gap: '5px',
+                          flexWrap: 'wrap',
+                          paddingTop: '6px',
+                          borderTop: '1px dashed var(--border-rim)',
                         }}
-                        title="Delete"
                       >
-                        <Trash2 size={14} />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => onViewReceipt(item)}
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.22) 100%)',
+                            border: '1px solid rgba(16, 185, 129, 0.35)',
+                            color: '#047857',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            whiteSpace: 'nowrap',
+                          }}
+                          title={lang === 'BN' ? 'পূর্ণাঙ্গ রসিদ ও প্রত্যয়নপত্র দেখুন' : 'View Full Certificate'}
+                        >
+                          <FileText size={12} />
+                          <span>{lang === 'BN' ? 'রসিদ' : 'Receipt'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => onViewReceipt(item, 'PRINT')}
+                          style={{
+                            background: 'var(--surface-top)',
+                            border: '1px solid var(--border-rim)',
+                            color: 'var(--text-main)',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            whiteSpace: 'nowrap',
+                          }}
+                          title={lang === 'BN' ? 'প্রিন্ট করুন' : 'Print Receipt'}
+                        >
+                          <Printer size={12} />
+                          <span>{lang === 'BN' ? 'প্রিন্ট' : 'Print'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => onViewReceipt(item, 'PDF')}
+                          style={{
+                            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                            border: 'none',
+                            color: '#FFFFFF',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)',
+                            whiteSpace: 'nowrap',
+                          }}
+                          title={lang === 'BN' ? 'পিডিএফ ফাইল ডাউনলোড' : 'Download PDF'}
+                        >
+                          <FileDown size={12} />
+                          <span>PDF</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => onViewReceipt(item, 'JPG')}
+                          style={{
+                            background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                            border: 'none',
+                            color: '#FFFFFF',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            boxShadow: '0 2px 4px rgba(245, 158, 11, 0.25)',
+                            whiteSpace: 'nowrap',
+                          }}
+                          title={lang === 'BN' ? 'জেপিজি ছবি ডাউনলোড' : 'Download JPG'}
+                        >
+                          <ImageIcon size={12} />
+                          <span>JPG</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))}

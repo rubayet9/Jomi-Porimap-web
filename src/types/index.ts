@@ -70,14 +70,20 @@ export interface CalculationHistoryItem {
   dateStr: string;
   tabType: string;
   shapeType: string;
+  shape?: LandShape;
   unit: AppUnit;
   inputsDesc: string;
+  inputs?: Record<string, string>;
+  result?: CalculationResult;
   sqFeet: number;
   sqMeters: number;
   sotangso: number;
   katha: number;
   bigha: number;
   totalPrice?: number;
+  triangleMethod?: TriangleMethod;
+  landPrice?: number;
+  priceUnit?: PriceUnit;
 }
 
 export interface CanvasPoint {

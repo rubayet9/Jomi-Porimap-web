@@ -133,6 +133,10 @@ export const App: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
+  // Active History item & Auto-Action for Certificate Modal
+  const [activeHistoryItem, setActiveHistoryItem] = useState<CalculationHistoryItem | null>(null);
+  const [modalAutoAction, setModalAutoAction] = useState<'PRINT' | 'PDF' | 'JPG' | null>(null);
+
   // User Auth State (Firebase real user only, demo login removed)
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(() => auth.currentUser);
 
@@ -403,13 +407,19 @@ export const App: React.FC = () => {
         }),
         tabType: 'CALCULATOR',
         shapeType: shape,
+        shape: shape,
         unit: currentUnit,
         inputsDesc: inputsSummary || `${shape} calculation`,
+        inputs: { ...currentInputs },
+        result: computedMetrics,
+        triangleMethod: currentTriMethod,
         sqFeet: computedMetrics.sqFeet,
         sqMeters: computedMetrics.sqMeters,
         sotangso: computedMetrics.sotangso,
         katha: computedMetrics.katha,
         bigha: computedMetrics.bigha,
+        landPrice: landPrice,
+        priceUnit: priceUnit,
         totalPrice: calculatedTotalPrice,
       };
 
@@ -468,7 +478,16 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleViewHistoryReceipt = (item: CalculationHistoryItem, action?: 'PRINT' | 'PDF' | 'JPG') => {
+    sound.playClick();
+    setActiveHistoryItem(item);
+    setModalAutoAction(action || null);
+    setIsResultModalOpen(true);
+  };
+
   const handleManualCalculate = () => {
+    setActiveHistoryItem(null);
+    setModalAutoAction(null);
     if (selectedShape === 'FREEFORM') {
       if (freeformPoints.length < 3) {
         sound.playReset();
@@ -759,8 +778,8 @@ export const App: React.FC = () => {
                   </div>
                 )}
 
-                <div style={{ marginTop: '24px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <div style={{ flex: 1 }}>
+                <div className="calc-action-row" style={{ marginTop: '24px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <div style={{ flex: 1.25 }}>
                     <SkeuoButton
                       id="calculate-btn"
                       label={getTranslation('calculate_btn', lang)}
@@ -771,33 +790,36 @@ export const App: React.FC = () => {
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    id="reset-measurements-btn"
-                    onClick={handleResetCalculator}
-                    className="rocker-btn"
-                    title={lang === 'BN' ? 'সব পরিমাপ মুছে ফেলুন ও নতুন পরিমাপ দিন' : 'Clear and reset inputs'}
-                    style={{
-                      height: '46px',
-                      padding: '0 18px',
-                      borderRadius: '12px',
-                      fontSize: '14px',
-                      fontWeight: 800,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      cursor: 'pointer',
-                      border: '1.5px solid rgba(239, 68, 68, 0.5)',
-                      background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.2) 100%)',
-                      color: '#EF4444',
-                      boxShadow: '0 2px 8px rgba(239, 68, 68, 0.2)',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <Trash2 size={18} />
-                    <span>{lang === 'BN' ? 'মুছে ফেলুন' : 'Clear All'}</span>
-                  </button>
+                  <div style={{ flex: 1 }}>
+                    <button
+                      type="button"
+                      id="reset-measurements-btn"
+                      onClick={handleResetCalculator}
+                      className="rocker-btn calc-reset-btn"
+                      title={lang === 'BN' ? 'সব পরিমাপ মুছে ফেলুন ও নতুন পরিমাপ দিন' : 'Clear and reset inputs'}
+                      style={{
+                        width: '100%',
+                        height: '46px',
+                        padding: '0 14px',
+                        borderRadius: '12px',
+                        fontSize: '13.5px',
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        border: '1.5px solid rgba(239, 68, 68, 0.5)',
+                        background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.2) 100%)',
+                        color: '#EF4444',
+                        boxShadow: '0 2px 8px rgba(239, 68, 68, 0.2)',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <Trash2 size={16} />
+                      <span>{lang === 'BN' ? 'মুছে ফেলুন' : 'Clear All'}</span>
+                    </button>
+                  </div>
                 </div>
               </SkeuoCard>
             )}
@@ -877,6 +899,8 @@ export const App: React.FC = () => {
             lang={lang}
             sotangsoPerKatha={sotangsoPerKatha}
             onShowResultModal={(res) => {
+              setActiveHistoryItem(null);
+              setModalAutoAction(null);
               setResult(res);
               setSelectedShape('TRIANGLE');
               setIsResultModalOpen(true);
@@ -893,13 +917,18 @@ export const App: React.FC = () => {
                 }),
                 tabType: 'TRIANGULATION',
                 shapeType: 'Triangulation',
+                shape: 'TRIANGLE',
                 unit: unit,
                 inputsDesc: desc,
+                inputs: { description: desc },
+                result: res,
                 sqFeet: res.sqFeet,
                 sqMeters: res.sqMeters,
                 sotangso: res.sotangso,
                 katha: res.katha,
                 bigha: res.bigha,
+                landPrice: landPrice,
+                priceUnit: priceUnit,
                 totalPrice: computeTotalPrice(res, landPrice, priceUnit),
               };
               setHistoryList((prev) => [historyItem, ...prev]);
@@ -931,13 +960,18 @@ export const App: React.FC = () => {
                 }),
                 tabType: 'KHATIAN',
                 shapeType: 'Khatian',
+                shape: 'KHATIAN',
                 unit: unit,
                 inputsDesc: desc,
+                inputs: { description: desc },
+                result: computedRes,
                 sqFeet: sotangsoVal * 435.6,
                 sqMeters: (sotangsoVal * 435.6) / 10.7639,
                 sotangso: sotangsoVal,
                 katha: sotangsoVal / sotangsoPerKatha,
                 bigha: (sotangsoVal * 435.6) / 14400.0,
+                landPrice: landPrice,
+                priceUnit: priceUnit,
                 totalPrice: computeTotalPrice(computedRes, landPrice, priceUnit),
               };
               setHistoryList((prev) => [historyItem, ...prev]);
@@ -960,6 +994,7 @@ export const App: React.FC = () => {
             historyList={historyList}
             onClearHistory={() => setHistoryList([])}
             onDeleteHistoryItem={(id) => setHistoryList((prev) => prev.filter((item) => item.id !== id))}
+            onViewReceipt={handleViewHistoryReceipt}
             landPrice={landPrice}
             onLandPriceChange={setLandPrice}
             priceUnit={priceUnit}
@@ -1005,17 +1040,45 @@ export const App: React.FC = () => {
 
       <CalculationResultModal
         isOpen={isResultModalOpen}
-        onClose={() => setIsResultModalOpen(false)}
-        result={result}
-        shape={selectedShape}
-        inputs={inputs}
-        unit={unit}
-        triangleMethod={triangleMethod}
-        freeformPoints={freeformPoints}
-        landPrice={landPrice}
-        priceUnit={priceUnit}
+        onClose={() => {
+          setIsResultModalOpen(false);
+          setActiveHistoryItem(null);
+          setModalAutoAction(null);
+        }}
+        result={
+          activeHistoryItem
+            ? activeHistoryItem.result ||
+              computeLandMetrics(activeHistoryItem.sqFeet, sotangsoPerKatha)
+            : result
+        }
+        shape={
+          activeHistoryItem
+            ? (activeHistoryItem.shape ||
+                (activeHistoryItem.tabType === 'KHATIAN'
+                  ? 'KHATIAN'
+                  : activeHistoryItem.tabType === 'TRIANGULATION'
+                  ? 'TRIANGULATION'
+                  : (activeHistoryItem.shapeType as LandShape)) ||
+                'RECTANGLE')
+            : selectedShape
+        }
+        inputs={
+          activeHistoryItem
+            ? activeHistoryItem.inputs || { description: activeHistoryItem.inputsDesc }
+            : inputs
+        }
+        unit={activeHistoryItem ? activeHistoryItem.unit || unit : unit}
+        triangleMethod={
+          activeHistoryItem ? activeHistoryItem.triangleMethod || triangleMethod : triangleMethod
+        }
+        freeformPoints={activeHistoryItem ? undefined : freeformPoints}
+        landPrice={activeHistoryItem?.landPrice !== undefined ? activeHistoryItem.landPrice : landPrice}
+        priceUnit={activeHistoryItem?.priceUnit || priceUnit}
         sotangsoPerKatha={sotangsoPerKatha}
         lang={lang}
+        autoAction={modalAutoAction}
+        historyDateStr={activeHistoryItem?.dateStr}
+        historyReceiptId={activeHistoryItem ? `JP-HIST-${activeHistoryItem.id.slice(-6)}` : undefined}
       />
 
       <UserManualModal
@@ -1039,6 +1102,10 @@ export const App: React.FC = () => {
         historyList={historyList}
         onDeleteHistoryItem={(id) => setHistoryList((prev) => prev.filter((item) => item.id !== id))}
         onClearHistory={() => setHistoryList([])}
+        onViewReceipt={(item, action) => {
+          setIsProfileModalOpen(false);
+          handleViewHistoryReceipt(item, action);
+        }}
         onLogout={() => {
           setCurrentUser(null);
         }}

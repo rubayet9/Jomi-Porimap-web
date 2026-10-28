@@ -247,6 +247,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.25);
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
   backdrop-filter: blur(14px) saturate(180%);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -544,6 +545,14 @@ body {
   transform: translateY(-1px);
 }
 
+.tab-label-desktop {
+  display: inline;
+}
+
+.tab-label-mobile {
+  display: none;
+}
+
 .tab-btn.active {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 248, 243, 0.92) 100%);
   color: #059669;
@@ -696,7 +705,7 @@ body {
   }
 
   .app-container {
-    padding: 10px 12px calc(84px + env(safe-area-inset-bottom, 16px)) 12px !important;
+    padding: 10px 12px calc(80px + env(safe-area-inset-bottom, 16px)) 12px !important;
   }
 
   /* Pinned Native Mobile App Bottom Navigation Bar */
@@ -708,7 +717,7 @@ body {
     z-index: 95 !important;
     border-radius: 20px 20px 0 0 !important;
     margin-bottom: 0 !important;
-    padding: 8px 6px calc(6px + env(safe-area-inset-bottom, 10px)) 6px !important;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 10px)) 4px !important;
     background: var(--glass-bg) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
@@ -717,8 +726,11 @@ body {
     border-right: none !important;
     border-bottom: none !important;
     box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.14) !important;
-    justify-content: space-around !important;
-    gap: 3px !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 2px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   [data-theme='dark'] .tab-bar-container {
@@ -729,11 +741,18 @@ body {
 
   .tab-btn {
     min-width: 0 !important;
-    flex: 1 !important;
-    padding: 6px 2px !important;
-    font-size: 11px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 6px 1px !important;
+    font-size: 10px !important;
     border-radius: 12px !important;
     gap: 2px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
     transition: transform 0.12s ease, background 0.18s ease !important;
   }
 
@@ -741,9 +760,32 @@ body {
     transform: scale(0.92) !important;
   }
 
+  .tab-btn.active {
+    transform: none !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.22) !important;
+  }
+
   .tab-btn svg {
-    width: 19px !important;
-    height: 19px !important;
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .tab-label-desktop {
+    display: none !important;
+  }
+
+  .tab-label-mobile {
+    display: block !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.2px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    line-height: 1.15 !important;
   }
 
   /* Native Touch Inputs: prevent iOS & Android Chrome auto-zoom */
@@ -756,30 +798,153 @@ body {
   }
 
   .skeuo-btn {
-    min-height: 44px;
-    padding: 11px 16px;
+    min-height: 42px !important;
+    padding: 9px 12px !important;
+    font-size: 13px !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  .skeuo-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .calc-action-row {
+    margin-top: 16px !important;
+    gap: 8px !important;
+  }
+
+  .calc-reset-btn {
+    height: 42px !important;
+    font-size: 13px !important;
+    padding: 0 10px !important;
+    gap: 5px !important;
+    white-space: nowrap !important;
+  }
+
+  .calc-reset-btn svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  /* Shape Selector Mobile 2-Column Responsive Grid */
+  .shape-selector-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .shape-selector-btn {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+    font-size: 11.5px !important;
+    border-radius: 12px !important;
+    min-height: 40px !important;
+  }
+
+  .shape-selector-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Unit Rocker (Feet / Meters) */
+  .rocker-trough {
+    padding: 4px !important;
+    border-radius: 14px !important;
+    gap: 4px !important;
+  }
+
+  .rocker-btn {
+    padding: 8px 10px !important;
+    font-size: 12.5px !important;
+    border-radius: 10px !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Valuation Card Elements */
+  .valuation-unit-select {
+    width: 124px !important;
+    padding: 8px 6px 8px 8px !important;
+    font-size: 13.5px !important;
+  }
+
+  /* Khatian 3 Action Buttons */
+  .khatian-actions-grid {
+    gap: 6px !important;
+  }
+
+  .khatian-actions-grid .skeuo-btn {
+    padding: 8px 4px !important;
+    font-size: 11px !important;
+    gap: 4px !important;
+  }
+
+  .khatian-actions-grid .skeuo-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* History & Profile Action Buttons Mobile 2x2 Grid */
+  .history-item-actions,
+  .profile-history-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+
+  .history-action-btn,
+  .profile-history-actions button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 7px 6px !important;
+    font-size: 11px !important;
   }
 
   .skeuo-card {
     border-radius: 18px !important;
   }
 
-  /* Compact Mobile App Header Bar */
-  header {
+  /* Compact Mobile App Header Bar - Centered Controls & Settings */
+  header,
+  .main-header {
     padding: 8px 0 12px 0 !important;
     margin-bottom: 12px !important;
-    gap: 8px !important;
+    gap: 10px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .header-brand {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    text-align: left !important;
   }
 
   .header-actions {
-    padding: 4px 6px !important;
-    gap: 4px !important;
+    padding: 4px 8px !important;
+    gap: 5px !important;
+    margin: 0 auto !important;
+    justify-content: center !important;
+    width: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .header-glass-btn {
     width: 32px !important;
     height: 32px !important;
     min-width: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   /* Mobile Dialogs: Smooth Bottom-Sheet style like native Android APK */
@@ -794,6 +959,228 @@ body {
     border-bottom: none !important;
     margin: 0 !important;
     animation: slideUpModalMobile 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+
+  /* Mobile Modal Enhancements: Clean, 100% In-Screen Fit */
+  .modal-content.result-modal-content {
+    max-height: 94vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .result-modal-card {
+    padding: 12px 10px !important;
+    border-radius: 20px 20px 0 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .modal-top-bar {
+    position: relative !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .modal-top-bar > div:first-child {
+    padding-right: 42px !important; /* Space for close button */
+  }
+
+  .modal-close-btn {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    z-index: 10 !important;
+  }
+
+  .modal-top-actions {
+    width: 100% !important;
+    display: flex !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+  }
+
+  .modal-action-btn {
+    flex: 1 !important;
+    height: 34px !important;
+    font-size: 12px !important;
+    padding: 0 8px !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+
+  /* Official Certificate Paper: Zero Overflow, Fit 100% in Mobile Screen */
+  .survey-receipt-paper,
+  #survey-printable-receipt,
+  #khatian-printable-receipt {
+    padding: 14px 10px !important;
+    border-radius: 12px !important;
+    outline-offset: -4px !important;
+    border-width: 2px !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .cert-header {
+    padding-bottom: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .cert-badge {
+    font-size: 9.5px !important;
+    padding: 2px 8px !important;
+    letter-spacing: 0.2px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .cert-title {
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+    margin: 4px 0 2px 0 !important;
+  }
+
+  .cert-subtitle {
+    font-size: 10px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .cert-meta-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    padding: 6px 10px !important;
+    font-size: 10.5px !important;
+    text-align: left !important;
+  }
+
+  .cert-inputs-wrapper {
+    padding: 8px 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .cert-inputs-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .cert-inputs-grid > div {
+    padding: 5px 8px !important;
+  }
+
+  .cert-spotlight-card {
+    padding: 12px 12px !important;
+    gap: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    margin-bottom: 10px !important;
+  }
+
+  .cert-spotlight-katha {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 6px 12px !important;
+    text-align: left !important;
+  }
+
+  /* 2x2 Grid for Core Units: Bigha, Acre, Sq.Ft, Sq.M (No Overflow!) */
+  .cert-units-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .cert-unit-box {
+    padding: 8px 10px !important;
+    overflow: hidden !important;
+  }
+
+  .cert-unit-box > div:first-child {
+    font-size: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .cert-unit-box > div:nth-child(2) {
+    font-size: 16px !important;
+  }
+
+  .cert-traditional-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    padding: 8px 10px !important;
+    font-size: 10.5px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .cert-valuation-card {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .cert-signatures-grid {
+    gap: 6px !important;
+    padding-top: 10px !important;
+    margin-top: 10px !important;
+    font-size: 9.5px !important;
+  }
+
+  .seal-icon-box {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .seal-icon-box svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .cert-bottom-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+  }
+
+  .cert-bottom-actions button {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 10px 6px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    justify-content: center !important;
+  }
+
+  .cert-bottom-actions .copy-btn {
+    grid-column: span 2 !important;
+  }
+
+  /* Khatian Certificate Grids Mobile Optimization */
+  .khatian-cert-metadata-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .khatian-cert-summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    padding: 10px 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .khatian-cert-shares-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
   }
 }
 

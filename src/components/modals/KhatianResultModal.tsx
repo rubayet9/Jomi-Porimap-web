@@ -342,7 +342,7 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
   return (
     <div className="modal-backdrop" onClick={onClose} style={{ padding: '16px 8px' }}>
       <div
-        className="modal-content"
+        className="modal-content result-modal-content"
         onClick={(e) => e.stopPropagation()}
         style={{
           maxWidth: '850px',
@@ -353,10 +353,10 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
         }}
       >
-        <SkeuoCard style={{ padding: '20px', overflow: 'hidden' }}>
+        <SkeuoCard className="result-modal-card" style={{ padding: '20px', overflow: 'hidden' }}>
           {/* Top Modal Bar - Action buttons (Hidden when printed) */}
           <div
-            className="no-print"
+            className="no-print modal-top-bar"
             style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -410,7 +410,7 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
             </div>
 
             {/* Actions: Print, PDF, JPG, Copy, Close */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="modal-top-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {/* Print Receipt */}
               <button
                 type="button"
@@ -541,7 +541,7 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
           <div
             id="khatian-printable-receipt"
             ref={receiptRef}
-            className="khatian-a4-receipt"
+            className="khatian-a4-receipt survey-receipt-paper"
             style={{
               background: '#FFFFFF',
               color: '#111827',
@@ -641,6 +641,7 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
 
             {/* Khatian & Document Metadata Row (With "(ঐচ্ছিক)" marks) */}
             <div
+              className="khatian-cert-metadata-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(4, 1fr)',
@@ -679,6 +680,7 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
 
             {/* Total Land Summary Bar (Strictly Survey Numbers) */}
             <div
+              className="khatian-cert-summary-grid"
               style={{
                 background: 'linear-gradient(135deg, #064E3B 0%, #047857 50%, #065F46 100%)',
                 color: '#FFFFFF',
@@ -769,6 +771,7 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
                 </div>
 
                 <div
+                  className="khatian-cert-shares-grid"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(3, 1fr)',
@@ -1008,6 +1011,7 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
 
             {/* Official Surveyor & Recipient Signature Block */}
             <div
+              className="cert-signatures-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',

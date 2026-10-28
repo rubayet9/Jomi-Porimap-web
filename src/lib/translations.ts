@@ -37,7 +37,7 @@ export const translations: Record<AppLanguage, Record<string, string>> = {
     shape_hexagon: 'Hexagon',
     shape_cube: 'Cube (3D / Earth)',
     shape_quadrilateral: 'Irregular 4-Sided',
-    shape_freeform: 'Custom Canvas Draw',
+    shape_freeform: 'Custom Canvas',
 
     // Dimensions
     dim_length: 'Length',
@@ -108,6 +108,13 @@ export const translations: Record<AppLanguage, Record<string, string>> = {
     tab_khatian: 'Khatian Share',
     tab_ai: 'Digital Amin AI',
     tab_history: 'History',
+
+    // Short versions for mobile
+    tab_calculator_short: 'Calculator',
+    tab_triangulation_short: 'Triangles',
+    tab_khatian_short: 'Khatian',
+    tab_ai_short: 'Amin AI',
+    tab_history_short: 'History',
 
     // Triangulation
     triangulation_title: 'Triangulation Survey Method',
@@ -255,7 +262,7 @@ export const translations: Record<AppLanguage, Record<string, string>> = {
     shape_hexagon: 'ষড়ভুজ',
     shape_cube: 'কিউব / মাটিকাটা (3D)',
     shape_quadrilateral: 'অনিয়মিত চতুর্ভুজ',
-    shape_freeform: 'ক্যানভাসে কাস্টম ড্রয়িং',
+    shape_freeform: 'কাস্টম ক্যানভাস',
 
     // Dimensions
     dim_length: 'দৈর্ঘ্য',
@@ -326,6 +333,13 @@ export const translations: Record<AppLanguage, Record<string, string>> = {
     tab_khatian: 'খতিয়ান হিস্যা',
     tab_ai: 'ডিজিটাল আমিন AI',
     tab_history: 'হিস্ট্রি',
+
+    // Short versions for mobile
+    tab_calculator_short: 'ক্যালকুলেটর',
+    tab_triangulation_short: 'ত্রিভুজায়ন',
+    tab_khatian_short: 'খতিয়ান',
+    tab_ai_short: 'আমিন AI',
+    tab_history_short: 'হিস্ট্রি',
 
     // Triangulation
     triangulation_title: 'ত্রিভুজায়ন পদ্ধতি (সবচেয়ে নির্ভুল)',

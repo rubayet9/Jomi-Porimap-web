@@ -9,6 +9,10 @@ import {
   Layers,
   ArrowRight,
   RotateCcw,
+  Printer,
+  FileDown,
+  Image as ImageIcon,
+  FileText,
 } from 'lucide-react';
 import { AppLanguage, CalculationHistoryItem, PriceUnit } from '../../types';
 import { getTranslation } from '../../lib/translations';
@@ -21,6 +25,7 @@ interface HistoryTabProps {
   historyList: CalculationHistoryItem[];
   onClearHistory: () => void;
   onDeleteHistoryItem: (id: string) => void;
+  onViewReceipt: (item: CalculationHistoryItem, autoAction?: 'PRINT' | 'PDF' | 'JPG') => void;
   landPrice: number;
   onLandPriceChange: (price: number) => void;
   priceUnit: PriceUnit;
@@ -33,6 +38,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({
   historyList,
   onClearHistory,
   onDeleteHistoryItem,
+  onViewReceipt,
   lang,
 }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -216,6 +222,117 @@ ${item.totalPrice ? `• মূল্য: ${formatBDT(item.totalPrice)}` : ''}`;
                       <span style={{ fontWeight: 800, color: '#2E7D32' }}>{formatBDT(item.totalPrice)}</span>
                     </div>
                   ) : null}
+                </div>
+
+                {/* Print, PDF, JPG, View Receipt Actions Bar */}
+                <div
+                  className="history-item-actions"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    flexWrap: 'wrap',
+                    paddingTop: '6px',
+                    borderTop: '1px dashed var(--border-rim)',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onViewReceipt(item)}
+                    className="history-action-btn view-btn"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.22) 100%)',
+                      border: '1px solid rgba(16, 185, 129, 0.35)',
+                      color: '#047857',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '11.5px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      whiteSpace: 'nowrap',
+                    }}
+                    title={lang === 'BN' ? 'পূর্ণাঙ্গ রসিদ ও প্রত্যয়নপত্র দেখুন' : 'View Full Certificate'}
+                  >
+                    <FileText size={13} />
+                    <span>{lang === 'BN' ? 'রসিদ দেখুন' : 'View Receipt'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onViewReceipt(item, 'PRINT')}
+                    className="history-action-btn"
+                    style={{
+                      background: 'var(--surface-top)',
+                      border: '1px solid var(--border-rim)',
+                      color: 'var(--text-main)',
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      fontSize: '11.5px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      whiteSpace: 'nowrap',
+                    }}
+                    title={lang === 'BN' ? 'প্রিন্ট করুন' : 'Print Receipt'}
+                  >
+                    <Printer size={13} />
+                    <span>{lang === 'BN' ? 'প্রিন্ট' : 'Print'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onViewReceipt(item, 'PDF')}
+                    className="history-action-btn pdf-btn"
+                    style={{
+                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                      border: 'none',
+                      color: '#FFFFFF',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '11.5px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)',
+                      whiteSpace: 'nowrap',
+                    }}
+                    title={lang === 'BN' ? 'পিডিএফ ফাইল ডাউনলোড' : 'Download PDF'}
+                  >
+                    <FileDown size={13} />
+                    <span>PDF</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onViewReceipt(item, 'JPG')}
+                    className="history-action-btn jpg-btn"
+                    style={{
+                      background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                      border: 'none',
+                      color: '#FFFFFF',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '11.5px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      boxShadow: '0 2px 6px rgba(245, 158, 11, 0.25)',
+                      whiteSpace: 'nowrap',
+                    }}
+                    title={lang === 'BN' ? 'জেপিজি ছবি ডাউনলোড' : 'Download JPG'}
+                  >
+                    <ImageIcon size={13} />
+                    <span>JPG</span>
+                  </button>
                 </div>
               </div>
             ))}

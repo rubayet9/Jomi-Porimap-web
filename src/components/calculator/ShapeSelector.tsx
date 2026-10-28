@@ -48,6 +48,7 @@ export const ShapeSelector: React.FC<ShapeSelectorProps> = ({
 
   return (
     <div
+      className="shape-selector-grid"
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
@@ -62,6 +63,7 @@ export const ShapeSelector: React.FC<ShapeSelectorProps> = ({
             key={item.key}
             type="button"
             onClick={() => handleSelect(item.key)}
+            className={`shape-selector-btn ${isSelected ? 'selected' : ''}`}
             style={{
               display: 'flex',
               alignItems: 'center',

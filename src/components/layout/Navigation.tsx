@@ -16,11 +16,11 @@ export const Navigation: React.FC<NavigationProps> = ({
   lang,
 }) => {
   const tabs = [
-    { key: 'CALCULATOR', icon: <Calculator size={18} />, labelKey: 'tab_calculator' },
-    { key: 'TRIANGULATION', icon: <Shapes size={18} />, labelKey: 'tab_triangulation' },
-    { key: 'KHATIAN', icon: <Scale size={18} />, labelKey: 'tab_khatian' },
-    { key: 'AI_ASSISTANT', icon: <Bot size={18} />, labelKey: 'tab_ai' },
-    { key: 'HISTORY', icon: <History size={18} />, labelKey: 'tab_history' },
+    { key: 'CALCULATOR', icon: <Calculator size={18} />, labelKey: 'tab_calculator', shortLabelKey: 'tab_calculator_short' },
+    { key: 'TRIANGULATION', icon: <Shapes size={18} />, labelKey: 'tab_triangulation', shortLabelKey: 'tab_triangulation_short' },
+    { key: 'KHATIAN', icon: <Scale size={18} />, labelKey: 'tab_khatian', shortLabelKey: 'tab_khatian_short' },
+    { key: 'AI_ASSISTANT', icon: <Bot size={18} />, labelKey: 'tab_ai', shortLabelKey: 'tab_ai_short' },
+    { key: 'HISTORY', icon: <History size={18} />, labelKey: 'tab_history', shortLabelKey: 'tab_history_short' },
   ];
 
   const handleTabClick = (tabKey: string) => {
@@ -38,9 +38,11 @@ export const Navigation: React.FC<NavigationProps> = ({
             type="button"
             onClick={() => handleTabClick(tab.key)}
             className={`tab-btn ${isActive ? 'active' : ''}`}
+            title={getTranslation(tab.labelKey, lang)}
           >
-            <span>{tab.icon}</span>
-            <span>{getTranslation(tab.labelKey, lang)}</span>
+            <span className="tab-icon-wrap">{tab.icon}</span>
+            <span className="tab-label-desktop">{getTranslation(tab.labelKey, lang)}</span>
+            <span className="tab-label-mobile">{getTranslation(tab.shortLabelKey, lang)}</span>
           </button>
         );
       })}

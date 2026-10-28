@@ -690,7 +690,7 @@ export const KhatianTab: React.FC<KhatianTabProps> = ({
               </button>
 
               {/* Action Buttons: Copy, Print, Save to History */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+              <div className="khatian-actions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                 <button
                   type="button"
                   onClick={handleCopySingle}

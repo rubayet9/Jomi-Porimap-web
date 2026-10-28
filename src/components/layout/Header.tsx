@@ -45,6 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header
+      className="main-header"
       style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -57,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
       }}
     >
       {/* Brand & Identity */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div className="header-brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div
           style={{
             width: '44px',

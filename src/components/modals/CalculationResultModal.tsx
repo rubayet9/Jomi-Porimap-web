@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   X,
   Printer,
@@ -47,6 +47,9 @@ interface CalculationResultModalProps {
   priceUnit: PriceUnit;
   sotangsoPerKatha: number;
   lang: AppLanguage;
+  autoAction?: 'PRINT' | 'PDF' | 'JPG' | null;
+  historyDateStr?: string;
+  historyReceiptId?: string;
 }
 
 export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
@@ -62,6 +65,9 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
   priceUnit,
   sotangsoPerKatha,
   lang,
+  autoAction,
+  historyDateStr,
+  historyReceiptId,
 }) => {
   if (!isOpen) return null;
 
@@ -72,11 +78,14 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
   const printableRef = useRef<HTMLDivElement | null>(null);
 
   const receiptId = useMemo(
-    () => `JP-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`,
-    [isOpen]
+    () =>
+      historyReceiptId ||
+      `JP-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`,
+    [isOpen, historyReceiptId]
   );
 
   const currentDateStr = useMemo(() => {
+    if (historyDateStr) return historyDateStr;
     return new Date().toLocaleDateString(lang === 'BN' ? 'bn-BD' : 'en-US', {
       year: 'numeric',
       month: 'long',
@@ -84,7 +93,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
       hour: '2-digit',
       minute: '2-digit',
     });
-  }, [lang, isOpen]);
+  }, [lang, isOpen, historyDateStr]);
 
   const unitLabel = unit === 'FEET' ? (lang === 'BN' ? 'ফুট' : 'ft') : (lang === 'BN' ? 'মিটার' : 'm');
 
@@ -100,7 +109,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
     return lang === 'BN' ? toBengaliNumerals(s) : s;
   };
 
-  const shapeTitleMap: Record<LandShape, { en: string; bn: string }> = {
+  const shapeTitleMap: Record<string, { en: string; bn: string }> = {
     RECTANGLE: { en: 'Rectangle', bn: 'আয়তক্ষেত্র' },
     SQUARE: { en: 'Square', bn: 'বর্গক্ষেত্র' },
     TRIANGLE: { en: 'Triangle', bn: 'ত্রিভুজ' },
@@ -112,6 +121,8 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
     CUBE: { en: 'Cube (3D / Earth)', bn: 'কিউব / মাটিকাটা' },
     QUADRILATERAL: { en: 'Irregular Quadrilateral', bn: 'অনিয়মিত চতুর্ভুজ' },
     FREEFORM: { en: 'Custom Canvas Polygon', bn: 'কাস্টম ক্যানভাস ড্রয়িং' },
+    KHATIAN: { en: 'Khatian Land Assessment', bn: 'খতিয়ান হিস্যা ও বণ্টন' },
+    TRIANGULATION: { en: 'Triangulation Survey', bn: 'ত্রিভুজায়ন জরিপ' },
   };
 
   const currentShapeTitle =
@@ -154,6 +165,21 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
         label: lang === 'BN' ? 'মোট সীমানা পয়েন্ট' : 'Total Boundary Pins',
         value: `${freeformPoints?.length || 0} ${lang === 'BN' ? 'টি' : 'pins'}`,
       });
+    }
+
+    if (list.length === 0) {
+      if (inputs.description) {
+        list.push({
+          label: lang === 'BN' ? 'পরিমাপ বিবরণ' : 'Measurement Info',
+          value: inputs.description,
+        });
+      } else {
+        Object.entries(inputs).forEach(([k, v]) => {
+          if (v && v !== '0') {
+            list.push({ label: k, value: String(v) });
+          }
+        });
+      }
     }
 
     return list;
@@ -415,10 +441,27 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
     }
   };
 
+  // Automatically trigger requested action (Print, PDF, JPG) if opened from History with direct action
+  useEffect(() => {
+    if (!isOpen || !autoAction) return;
+
+    const timer = setTimeout(() => {
+      if (autoAction === 'PRINT') {
+        handlePrint();
+      } else if (autoAction === 'PDF') {
+        handleDownloadPdf();
+      } else if (autoAction === 'JPG') {
+        handleDownloadJpg();
+      }
+    }, 550);
+
+    return () => clearTimeout(timer);
+  }, [isOpen, autoAction]);
+
   return (
     <div className="modal-backdrop" onClick={onClose} style={{ padding: '16px 8px' }}>
       <div
-        className="modal-content"
+        className="modal-content result-modal-content"
         onClick={(e) => e.stopPropagation()}
         style={{
           maxWidth: '820px',
@@ -429,10 +472,10 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
         }}
       >
-        <SkeuoCard style={{ padding: '20px', overflow: 'hidden' }}>
+        <SkeuoCard className="result-modal-card" style={{ padding: '20px', overflow: 'hidden' }}>
           {/* Top Modal Controls Header (Hidden in Print & Exports) */}
           <div
-            className="no-print"
+            className="no-print modal-top-bar"
             style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -444,7 +487,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               gap: '10px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '180px' }}>
               <div
                 style={{
                   width: '40px',
@@ -456,6 +499,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                   justifyContent: 'center',
                   color: '#FFFFFF',
                   boxShadow: '0 4px 12px rgba(46, 125, 50, 0.35)',
+                  flexShrink: 0,
                 }}
               >
                 <Award size={22} />
@@ -475,7 +519,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                 >
                   <span>{getTranslation('calc_result_modal_title', lang)}</span>
                 </h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px', flexWrap: 'wrap' }}>
                   <span
                     style={{
                       background: 'rgba(46, 125, 50, 0.15)',
@@ -496,11 +540,11 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
             </div>
 
             {/* Quick Actions at Top */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="modal-top-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 type="button"
                 onClick={handlePrint}
-                className="header-glass-btn"
+                className="header-glass-btn modal-action-btn"
                 style={{
                   width: 'auto',
                   padding: '0 12px',
@@ -519,7 +563,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                 type="button"
                 onClick={handleDownloadPdf}
                 disabled={isExportingPdf}
-                className="header-glass-btn"
+                className="header-glass-btn modal-action-btn"
                 style={{
                   width: 'auto',
                   padding: '0 14px',
@@ -543,7 +587,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                 type="button"
                 onClick={handleDownloadJpg}
                 disabled={isExportingJpg}
-                className="header-glass-btn"
+                className="header-glass-btn modal-action-btn"
                 style={{
                   width: 'auto',
                   padding: '0 14px',
@@ -566,8 +610,8 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="header-glass-btn"
-                style={{ height: '36px', padding: '0 10px' }}
+                className="header-glass-btn modal-close-btn"
+                style={{ height: '36px', padding: '0 10px', width: '36px' }}
                 title={lang === 'BN' ? 'বন্ধ করুন' : 'Close'}
               >
                 <X size={18} />
@@ -604,6 +648,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
           <div
             id="survey-printable-receipt"
             ref={printableRef}
+            className="survey-receipt-paper"
             style={{
               background: '#FFFFFF',
               color: '#111827',
@@ -620,6 +665,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
           >
             {/* Top Official Certificate Header */}
             <div
+              className="cert-header"
               style={{
                 textAlign: 'center',
                 borderBottom: '2px solid #064E3B',
@@ -629,6 +675,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               }}
             >
               <div
+                className="cert-badge"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -649,6 +696,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               </div>
 
               <h2
+                className="cert-title"
                 style={{
                   fontSize: '20px',
                   fontWeight: 900,
@@ -663,6 +711,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               </h2>
 
               <div
+                className="cert-subtitle"
                 style={{
                   fontSize: '11.5px',
                   color: '#047857',
@@ -675,6 +724,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               </div>
 
               <div
+                className="cert-meta-row"
                 style={{
                   fontSize: '11px',
                   color: '#4B5563',
@@ -728,6 +778,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
                   {getTranslation('input_summary', lang)}:
                 </div>
                 <div
+                  className="cert-inputs-grid"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
@@ -756,6 +807,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
             {/* Primary Spotlight Card: Sotangso / Decimal */}
             <div
+              className="cert-spotlight-card"
               style={{
                 background: 'linear-gradient(135deg, #064E3B 0%, #022c22 100%)',
                 color: '#FFFFFF',
@@ -803,6 +855,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
               </div>
 
               <div
+                className="cert-spotlight-katha"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   padding: '10px 18px',
@@ -834,6 +887,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
             {/* Core Units Grid (Bigha, Acre, Sq.Ft, Sq.M) */}
             <div
+              className="cert-units-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(4, 1fr)',
@@ -843,6 +897,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
             >
               {/* Bigha */}
               <div
+                className="cert-unit-box"
                 style={{
                   background: '#F9FAFB',
                   padding: '10px 12px',
@@ -863,6 +918,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
               {/* Acre */}
               <div
+                className="cert-unit-box"
                 style={{
                   background: '#F9FAFB',
                   padding: '10px 12px',
@@ -883,6 +939,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
               {/* Total Sq. Feet */}
               <div
+                className="cert-unit-box"
                 style={{
                   background: '#F9FAFB',
                   padding: '10px 12px',
@@ -903,6 +960,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
               {/* Total Sq. Meters */}
               <div
+                className="cert-unit-box"
                 style={{
                   background: '#F9FAFB',
                   padding: '10px 12px',
@@ -924,6 +982,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
             {/* Traditional units: Chhatak & Hectare */}
             <div
+              className="cert-traditional-grid"
               style={{
                 display: 'flex',
                 gap: '12px',
@@ -951,6 +1010,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
             {/* Land Price / Financial Valuation Card */}
             {landPrice > 0 && (
               <div
+                className="cert-valuation-card"
                 style={{
                   background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)',
                   borderRadius: '10px',
@@ -1011,6 +1071,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
             {/* Official Verification Signatures & Seal */}
             <div
+              className="cert-signatures-grid"
               style={{
                 marginTop: '16px',
                 paddingTop: '14px',
@@ -1030,6 +1091,7 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
 
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div
+                  className="seal-icon-box"
                   style={{
                     width: '46px',
                     height: '46px',
@@ -1079,11 +1141,11 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
           </div>
 
           {/* Action Buttons (outside printableRef - not captured in exports) */}
-          <div className="no-print" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
+          <div className="no-print cert-bottom-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
             <button
               type="button"
               onClick={handleCopy}
-              className="rocker-btn active-feet"
+              className="rocker-btn active-feet copy-btn"
               style={{
                 flex: 1,
                 minWidth: '140px',
