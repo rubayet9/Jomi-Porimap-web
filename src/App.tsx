@@ -44,6 +44,7 @@ import { AboutDeveloperModal } from './components/modals/AboutDeveloperModal';
 import { SettingsModal } from './components/modals/SettingsModal';
 import { UserManualModal } from './components/modals/UserManualModal';
 import { CalculationResultModal } from './components/modals/CalculationResultModal';
+import { SurveyCertificatePage, SurveyCertificateData } from './components/certificate/SurveyCertificatePage';
 import { AuthModal } from './components/auth/AuthModal';
 import { UserProfileModal } from './components/auth/UserProfileModal';
 import { auth, onAuthStateChanged, FirebaseUser } from './lib/firebase';
@@ -132,6 +133,10 @@ export const App: React.FC = () => {
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // Dedicated Full-Page A4 Certificate View
+  const [isCertificatePageOpen, setIsCertificatePageOpen] = useState<boolean>(false);
+  const [certificateData, setCertificateData] = useState<SurveyCertificateData | null>(null);
 
   // Active History item & Auto-Action for Certificate Modal
   const [activeHistoryItem, setActiveHistoryItem] = useState<CalculationHistoryItem | null>(null);
@@ -478,11 +483,59 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleViewHistoryReceipt = (item: CalculationHistoryItem, action?: 'PRINT' | 'PDF' | 'JPG') => {
+  const handleOpenCertificatePage = (
+    action?: 'PRINT' | 'PDF' | 'JPG',
+    customItem?: CalculationHistoryItem | null
+  ) => {
     sound.playClick();
-    setActiveHistoryItem(item);
-    setModalAutoAction(action || null);
-    setIsResultModalOpen(true);
+    const item = customItem || activeHistoryItem;
+
+    const targetResult = item
+      ? item.result || computeLandMetrics(item.sqFeet, sotangsoPerKatha)
+      : result;
+
+    const targetShape = item
+      ? (item.shape ||
+          (item.tabType === 'KHATIAN'
+            ? 'KHATIAN'
+            : item.tabType === 'TRIANGULATION'
+            ? 'TRIANGULATION'
+            : (item.shapeType as LandShape)) ||
+          'RECTANGLE')
+      : selectedShape;
+
+    const targetInputs = item
+      ? item.inputs || { description: item.inputsDesc }
+      : inputs;
+
+    const targetUnit = item ? item.unit || unit : unit;
+    const targetTriMethod = item ? item.triangleMethod || triangleMethod : triangleMethod;
+    const targetPrice = item?.landPrice !== undefined ? item.landPrice : landPrice;
+    const targetPriceUnit = item?.priceUnit || priceUnit;
+    const targetReceiptId = item ? `JP-HIST-${item.id.slice(-6)}` : undefined;
+    const targetDateStr = item?.dateStr;
+
+    setCertificateData({
+      result: targetResult,
+      shape: targetShape,
+      inputs: targetInputs,
+      unit: targetUnit,
+      triangleMethod: targetTriMethod,
+      landPrice: targetPrice,
+      priceUnit: targetPriceUnit,
+      sotangsoPerKatha: sotangsoPerKatha,
+      receiptId: targetReceiptId,
+      dateStr: targetDateStr,
+      autoAction: action || null,
+    });
+
+    setIsResultModalOpen(false);
+    setIsProfileModalOpen(false);
+    setIsCertificatePageOpen(true);
+  };
+
+  const handleViewHistoryReceipt = (item: CalculationHistoryItem, action?: 'PRINT' | 'PDF' | 'JPG') => {
+    handleOpenCertificatePage(action, item);
   };
 
   const handleManualCalculate = () => {
@@ -585,6 +638,19 @@ export const App: React.FC = () => {
         return '';
     }
   };
+
+  if (isCertificatePageOpen && certificateData) {
+    return (
+      <SurveyCertificatePage
+        data={certificateData}
+        lang={lang}
+        onBack={() => {
+          sound.playClick();
+          setIsCertificatePageOpen(false);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="app-container">
@@ -1076,9 +1142,7 @@ export const App: React.FC = () => {
         priceUnit={activeHistoryItem?.priceUnit || priceUnit}
         sotangsoPerKatha={sotangsoPerKatha}
         lang={lang}
-        autoAction={modalAutoAction}
-        historyDateStr={activeHistoryItem?.dateStr}
-        historyReceiptId={activeHistoryItem ? `JP-HIST-${activeHistoryItem.id.slice(-6)}` : undefined}
+        onOpenCertificatePage={(action) => handleOpenCertificatePage(action)}
       />
 
       <UserManualModal

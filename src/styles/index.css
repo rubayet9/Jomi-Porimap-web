@@ -1309,3 +1309,96 @@ body {
   }
 }
 
+/* =========================================
+   DEDICATED A4 CERTIFICATE PAGE & EXPORT STYLES
+   ========================================= */
+
+.certificate-page-root {
+  min-height: 100vh;
+  background-color: #F1F5F9;
+}
+
+[data-theme='dark'] .certificate-page-root {
+  background-color: #0B130E;
+}
+
+[data-theme='dark'] .certificate-page-toolbar {
+  background: rgba(18, 30, 23, 0.95) !important;
+  border-bottom: 1px solid rgba(52, 211, 153, 0.2) !important;
+}
+
+.survey-certificate-a4-sheet {
+  background: #FFFFFF !important;
+  color: #111827 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Off-screen A4 capture element: locked to standard A4 desktop canvas (794px width) */
+.a4-export-capture {
+  width: 794px !important;
+  min-width: 794px !important;
+  max-width: 794px !important;
+  padding: 28px 32px !important;
+  box-sizing: border-box !important;
+  background: #FFFFFF !important;
+  color: #111827 !important;
+}
+
+.a4-export-capture .cert-official-badge span {
+  font-size: 11.5px !important;
+  line-height: 1.4 !important;
+  color: #065F46 !important;
+}
+
+.a4-export-capture .cert-title {
+  font-size: 22px !important;
+  line-height: 1.25 !important;
+}
+
+.a4-export-capture .cert-meta-row {
+  flex-direction: row !important;
+  justify-content: center !important;
+  font-size: 11.5px !important;
+}
+
+.a4-export-capture .cert-units-grid {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.a4-export-capture .cert-spotlight-card {
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+@media (max-width: 768px) {
+  .certificate-page-toolbar {
+    padding: 10px 12px !important;
+  }
+
+  .certificate-viewer-wrapper {
+    padding: 0 6px !important;
+    overflow-x: auto !important;
+  }
+
+  /* Responsive preview on mobile screens without affecting offscreen print/export */
+  .survey-certificate-a4-sheet:not(.a4-export-capture) {
+    padding: 18px 14px !important;
+    border-radius: 12px !important;
+  }
+
+  .survey-certificate-a4-sheet:not(.a4-export-capture) .cert-title {
+    font-size: 18px !important;
+  }
+
+  .survey-certificate-a4-sheet:not(.a4-export-capture) .cert-meta-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    font-size: 11px !important;
+  }
+
+  .survey-certificate-a4-sheet:not(.a4-export-capture) .cert-units-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
