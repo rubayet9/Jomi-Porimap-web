@@ -38,7 +38,7 @@ interface CalculationResultModalProps {
   isOpen: boolean;
   onClose: () => void;
   result: CalculationResult;
-  shape: LandShape;
+  shape: LandShape | 'KHATIAN' | 'TRIANGULATION' | string;
   inputs: Record<string, string>;
   unit: AppUnit;
   triangleMethod?: TriangleMethod;

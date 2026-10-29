@@ -70,7 +70,7 @@ export interface CalculationHistoryItem {
   dateStr: string;
   tabType: string;
   shapeType: string;
-  shape?: LandShape;
+  shape?: LandShape | 'KHATIAN' | 'TRIANGULATION' | string;
   unit: AppUnit;
   inputsDesc: string;
   inputs?: Record<string, string>;
