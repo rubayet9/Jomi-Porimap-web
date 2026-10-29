@@ -336,44 +336,19 @@ export const SurveyCertificatePage: React.FC<SurveyCertificatePageProps> = ({
     const element = printableRef.current;
     if (!element) throw new Error('Printable element not found');
 
-    // Clone element to an offscreen container with exact fixed 794px width (standard A4 at 96dpi)
-    // so mobile media queries NEVER shrink or distort the document!
-    const clone = element.cloneNode(true) as HTMLElement;
-    clone.className = 'survey-certificate-a4-sheet a4-export-capture';
-    clone.style.width = '794px';
-    clone.style.maxWidth = '794px';
-    clone.style.minWidth = '794px';
-    clone.style.boxSizing = 'border-box';
-    clone.style.margin = '0';
-    clone.style.backgroundColor = '#FFFFFF';
+    // Wait a brief moment to ensure fonts and styles are fully painted
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.left = '-9999px';
-    container.style.top = '0';
-    container.style.width = '794px';
-    container.style.zIndex = '-9999';
-    container.style.backgroundColor = '#FFFFFF';
-    container.appendChild(clone);
-    document.body.appendChild(container);
-
-    // Wait for clone rendering
-    await new Promise((resolve) => setTimeout(resolve, 250));
-
-    try {
-      const canvas = await html2canvas(clone, {
-        scale: 2.5, // Crisp 240+ DPI resolution
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#FFFFFF',
-        logging: false,
-        width: 794,
-        windowWidth: 794,
-      });
-      return canvas;
-    } finally {
-      document.body.removeChild(container);
-    }
+    const canvas = await html2canvas(element, {
+      scale: 2.5, // Crisp high-DPI resolution
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#FFFFFF',
+      logging: false,
+      scrollX: 0,
+      scrollY: 0,
+    });
+    return canvas;
   };
 
   const handleDownloadPdf = async () => {
@@ -734,36 +709,28 @@ export const SurveyCertificatePage: React.FC<SurveyCertificatePageProps> = ({
               className="cert-official-badge"
               style={{
                 display: 'block',
-                margin: '0 auto 8px auto',
+                margin: '0 auto 10px auto',
                 textAlign: 'center',
               }}
             >
-              <div
+              <span
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '7px',
+                  display: 'inline-block',
                   backgroundColor: '#ECFDF5',
                   border: '1.5px solid #10B981',
-                  borderRadius: '999px',
-                  padding: '4px 18px',
+                  borderRadius: '30px',
+                  padding: '5px 20px',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  color: '#064E3B',
+                  letterSpacing: '0.3px',
+                  lineHeight: '1.4',
+                  fontFamily: "'Hind Siliguri', sans-serif",
                   boxSizing: 'border-box',
                 }}
               >
-                <Award size={15} color="#047857" style={{ flexShrink: 0 }} />
-                <span
-                  style={{
-                    color: '#065F46',
-                    fontSize: '11.5px',
-                    fontWeight: 800,
-                    letterSpacing: '0.3px',
-                    lineHeight: 1.4,
-                  }}
-                >
-                  গণপ্রজাতন্ত্রী বাংলাদেশ অনুমোদিত ডিজিটাল সার্ভে স্ট্যান্ডার্ড
-                </span>
-              </div>
+                🏅 গণপ্রজাতন্ত্রী বাংলাদেশ অনুমোদিত ডিজিটাল সার্ভে স্ট্যান্ডার্ড
+              </span>
             </div>
 
             <h2
