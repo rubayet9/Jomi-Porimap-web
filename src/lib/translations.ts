@@ -198,7 +198,7 @@ export const translations: Record<AppLanguage, Record<string, string>> = {
     katha_standard: 'Standard (1 Katha = 1.65 Sotangso / 720 Sq.Ft)',
     katha_custom: 'Custom Regional (1 Katha = 2.70 Sotangso)',
     gemini_key: 'Google Gemini API Key',
-    gemini_key_hint: 'Enter your API key for live Gemini 2.5 Flash responses.',
+    gemini_key_hint: 'Pre-configured high-speed Google Gemini AI Vision API key for live Khatian OCR.',
     save_settings: 'Save Settings',
 
     user_manual: 'User Manual & Survey Guide',
@@ -424,7 +424,7 @@ export const translations: Record<AppLanguage, Record<string, string>> = {
     katha_standard: 'আদর্শ মান (১ কাঠা = ১.৬৫ শতাংশ / ৭২০ বর্গফুট)',
     katha_custom: 'আঞ্চলিক মান (১ কাঠা = ২.৭০ শতাংশ)',
     gemini_key: 'Google Gemini API Key',
-    gemini_key_hint: 'লাইভ Gemini 2.5 Flash এর সাথে সরাসরি সংযোগ করতে আপনার API Key লিখুন।',
+    gemini_key_hint: 'খতিয়ান ও পর্চা স্বয়ংক্রিয় OCR বিশ্লেষণের জন্য উচ্চগতির Gemini AI কি সক্রিয়ভাবে কনফিগার করা আছে।',
     save_settings: 'সংরক্ষণ করুন',
 
     user_manual: 'ব্যবহারকারী নির্দেশিকা',

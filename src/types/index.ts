@@ -91,10 +91,20 @@ export interface CanvasPoint {
   y: number;
 }
 
+export interface ChatAttachment {
+  id: string;
+  name: string;
+  type: 'image' | 'pdf';
+  mimeType: string;
+  dataUrl: string;
+  size?: number;
+}
+
 export interface ChatMessage {
   id: string;
   sender: 'USER' | 'AI';
   text: string;
   timestamp: number;
-  image?: string;
+  image?: string; // backwards compatibility with existing history
+  attachments?: ChatAttachment[]; // multiple images or PDF files
 }

@@ -74,7 +74,15 @@ export const App: React.FC = () => {
 
   const [geminiApiKey, setGeminiApiKey] = useState<string>(() => {
     const saved = localStorage.getItem('jomi_gemini_key');
-    return saved && saved.trim() !== '' ? saved : DEFAULT_GEMINI_API_KEY;
+    if (
+      !saved ||
+      saved.trim() === '' ||
+      saved.includes('Ab8RN6KnlxiPpychDFlVsuAWKJUo7ZGhzY5zjubJEY')
+    ) {
+      localStorage.setItem('jomi_gemini_key', DEFAULT_GEMINI_API_KEY);
+      return DEFAULT_GEMINI_API_KEY;
+    }
+    return saved;
   });
 
   const [landPrice, setLandPrice] = useState<number>(() => {
