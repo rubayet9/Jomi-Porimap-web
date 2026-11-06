@@ -1,0 +1,35 @@
+{
+  "short_name": "জমি পরিমাপ",
+  "name": "জমি পরিমাপ ও ডিজিটাল আমিন (Jomi Porimap & Digital Amin)",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app-icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#121614",
+  "theme_color": "#1B5E20",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "description": "পেশাদার ভূমি পরিমাপ, ত্রিভুজায়ন জরিপ, খতিয়ান বিশ্লেষণ ও এআই ডিজিটাল আমিন"
+}

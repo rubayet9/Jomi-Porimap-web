@@ -1,32 +1,48 @@
-# React + TypeScript + Vite
+# জমি পরিমাপ ও ডিজিটাল আমিন (Jomi Porimap & Digital Amin)
+> **পেশাদার ভূমি পরিমাপ, খতিয়ান বিশ্লেষণ, এআই পরামর্শক ও ডিজিটাল সার্ভেয়ার টোটাল স্টেশন ওয়েব প্ল্যাটফর্ম**
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+---
 
-Currently, two official plugins are available:
+## 📖 সম্পূর্ণ কারিগরি স্পেসিফিকেশন ও আর্কিটেকচার (AI Knowledge Base)
+যেকোনো AI Agent বা ডেভেলপার কোড না পড়ে পুরো ওয়েবসাইটের আর্কিটেকচার, ডিজাইন সিস্টেম, ফাংশন, ম্যাথ অ্যালগরিদম, ব্যাকএন্ড ও এপিআই ডিরেক্টরি বুঝতে নিচের মাস্টার ডকুমেন্টটি দেখুন:
+👉 **[AI_AGENT_KNOWLEDGE_BASE.md](./AI_AGENT_KNOWLEDGE_BASE.md)**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## ✨ প্রধান বৈশিষ্ট্যসমূহ (Key Features)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **ডিজিটাল টোটাল স্টেশন চ্যাসিস (Skeuomorphic & Glassmorphism UI):** বাস্তব সার্ভেয়ার হার্ডওয়্যারের মতো ৩D মেকানিক্যাল বাটন, স্ক্রু-রিভেট এবং ডিজিটাল নিয়ন এলসিডি ডিসপ্লে।
+2. **ভূমি পরিমাপ ক্যালকুলেটর (Land Calculator):** আয়তক্ষেত্র, ত্রিভুজ (হেরন সূত্র), পঞ্চভুজ, ষড়ভুজ, অনিয়মিত চতুর্ভুজ ও ইন্টারেক্টিভ ক্যানভাস ড্রয়িংয়ের শতভাগ নির্ভুল ক্ষেত্রফল (শতক, কাঠা, বিঘা, একর, বর্গফুট, বর্গমিটার)।
+3. **ত্রিভুজায়ন জরিপ (Triangulation Survey):** আঁকাবাঁকা ও বহুকোণী জমিকে একাধিক ত্রিভুজে বিভক্ত করে হেরন সূত্রে নির্ভুল ক্ষেত্রফল নির্ণয়।
+4. **খতিয়ান ও হিস্যা বণ্টন (Khatian Distribution):** ব্রিটিশ সিএস, এসএ, আরএস ও বিএস খতিয়ানের ১৬-আনা (আনা-গণ্ডা-কড়া-ক্রান্তি-তিল) এবং দশমিক (১.০০০) অংশের একক বা যৌথ হিস্যা বণ্টন ও দর নির্ধারণ।
+5. **ডিজিটাল আমিন এআই ল্যান্ড কনসালট্যান্ট (Gemini Vision AI):** খতিয়ানের একাধিক ছবি বা পিডিএফ ড্র্যাগ-অ্যান্ড-ড্রপ বিশ্লেষণ করে মোট জমি, দাগ নম্বর এবং অংশীদারদের প্রাপ্ত শতাংশ ও কাঠার নিখুঁত টেবিল তৈরি।
+6. **অফিসিয়াল A4 সার্ভে সার্টিফিকেট (Certified Survey Receipt):** আইসোলেটেড আইফ্রেম প্রিন্টিং ও একক পৃষ্ঠার A4 ফরম্যাটে পিডিএফ ও জেপিজি এক্সপোর্ট ইঞ্জিন।
+7. **ইউজার একাউন্ট ও ক্লাউড সিঙ্ক (Firebase Auth):** গুগল এক-ক্লিক লগইন, ইমেইল/পাসওয়ার্ড ও হোয়াটসঅ্যাপ পাসওয়ার্ড রিকভারিসহ হিসাবের হিস্ট্রি ক্লাউড সিঙ্ক।
+8. **ট্যাকটাইল অডিও সিন্থেসাইজার (Web Audio API):** কোনো এক্সটার্নাল অডিও ফাইল ছাড়া ব্রাউজারের অডিও ওয়েভফর্ম দিয়ে তৈরি মেকানিক্যাল স্প্রিং ক্লিক ও সার্ভেয়ার বিপ সাউন্ড।
 
-## Expanding the Oxlint configuration
+---
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## 🚀 লোকাল সেটআপ ও রান (Getting Started)
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+# ডিপেন্ডেন্সি ইনস্টল করুন
+npm.cmd install
+
+# ডেভেলপমেন্ট সার্ভার চালু করুন
+npm.cmd run dev
+
+# প্রোডাকশন বিল্ড তৈরি করুন
+npm.cmd run build
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+---
+
+## 🛠️ প্রযুক্তি স্ট্যাক (Tech Stack)
+* **Frontend:** React 19, TypeScript 6, Vite 8
+* **Styling:** Custom Skeuomorphic & Glassmorphism Engine (CSS Custom Properties)
+* **Backend & Auth:** Firebase 13 (Auth, Google OAuth)
+* **AI Integration:** Google Gemini Multimodal Vision API (`gemini-3.5-flash`, `gemini-flash-latest`)
+* **Export Engine:** html2canvas, jsPDF, Isolated Print iFrame
+* **Icons & Animation:** Lucide-React, canvas-confetti
+* **Audio:** Web Audio API Synthesizer
+

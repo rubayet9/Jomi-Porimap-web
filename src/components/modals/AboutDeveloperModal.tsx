@@ -98,6 +98,20 @@ export const AboutDeveloperModal: React.FC<AboutDeveloperModalProps> = ({
             </p>
           </div>
 
+          {/* App Branding Banner */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <img
+              src="/logo-banner.png"
+              alt="Jomi Porimap - Digital Amin"
+              style={{
+                maxWidth: '220px',
+                width: '100%',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(27, 94, 32, 0.2)',
+              }}
+            />
+          </div>
+
           {/* Personal Info Grid */}
           <div
             style={{

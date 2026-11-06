@@ -704,6 +704,15 @@ export const SurveyCertificatePage: React.FC<SurveyCertificatePageProps> = ({
               position: 'relative',
             }}
           >
+            {/* Official Logo Lockup */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '8px' }}>
+              <img
+                src="/logo-badge.png"
+                alt="জমি পরিমাপ - Digital Amin"
+                style={{ height: '52px', objectFit: 'contain' }}
+              />
+            </div>
+
             {/* 100% RELIABLE BADGE (NO GRADIENT, CRISP TEXT GUARANTEED FOR HTML/PDF/JPG) */}
             <div
               className="cert-official-badge"

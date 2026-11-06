@@ -369,21 +369,18 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div
+              <img
+                src="/app-icon.png"
+                alt="Logo"
                 style={{
                   width: '40px',
                   height: '40px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #10B981 0%, #047857 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#FFFFFF',
                   boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                  objectFit: 'cover',
+                  border: '1.5px solid rgba(16, 185, 129, 0.3)',
                 }}
-              >
-                <Scale size={20} />
-              </div>
+              />
               <div>
                 <h3
                   style={{
@@ -566,6 +563,14 @@ export const KhatianResultModal: React.FC<KhatianResultModalProps> = ({
                 position: 'relative',
               }}
             >
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '8px' }}>
+                <img
+                  src="/logo-badge.png"
+                  alt="জমি পরিমাপ - Digital Amin"
+                  style={{ height: '48px', objectFit: 'contain' }}
+                />
+              </div>
+
               <div
                 style={{
                   display: 'inline-flex',

@@ -241,22 +241,19 @@ export const CalculationResultModal: React.FC<CalculationResultModalProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div
+              <img
+                src="/app-icon.png"
+                alt="Logo"
                 style={{
                   width: '38px',
                   height: '38px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#FFFFFF',
                   boxShadow: '0 4px 10px rgba(16, 185, 129, 0.35)',
                   flexShrink: 0,
+                  objectFit: 'cover',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
                 }}
-              >
-                <Award size={20} />
-              </div>
+              />
 
               <div>
                 <h3

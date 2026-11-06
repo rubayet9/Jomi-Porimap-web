@@ -35,8 +35,8 @@ export const LandAiChat: React.FC<LandAiChatProps> = ({ lang, apiKey }) => {
       sender: 'AI',
       text:
         lang === 'BN'
-          ? `### স্বাগতম! আমি "ডিজিটাল আমিন" (Digital Amin)।\n\nআমি বাংলাদেশ ও দক্ষিণ এশিয়ার ভূমি জরিপ, খতিয়ান ও পর্চা বিশ্লেষক এআই সহকারী।\n\n📷 **নতুন সুবিধা:** আপনি সরাসরি আপনার **খতিয়ান বা পর্চার ৩-৪টি ছবি বা PDF ফাইল ড্র্যাগ-অ্যান্ড-ড্রপ অথবা আপলোড** করে যেকোনো প্রশ্ন করতে পারেন। আমি খতিয়ানের মোট জমি, দাগ নম্বর এবং অংশীদারদের প্রাপ্ত শতাংশ ও কাঠার নিখুঁত হিসাব বের করে দিব!\n\nএছাড়াও ভূমি আইন, নামজারি (খারিজ), হেবা বা দলিল সংক্রান্ত যেকোনো প্রশ্ন করতে পারেন:`
-          : `### Welcome! I am "Digital Amin" — Land & Khatian AI Assistant.\n\n📷 **New Feature:** You can upload or drag & drop up to **3-4 photos or PDF files** of your Khatian (পর্চা) and ask me to calculate the shares. I will extract the plot numbers, total land, and calculate each owner's exact share in Sotangso, Katha, and Sq.Ft!\n\nYou can also ask any questions about mutation (Namjari), deeds, or survey math:`,
+          ? `### স্বাগতম! আমি "ডিজিটাল আমিন" (Digital Amin)।\n\nআমি বাংলাদেশ ও দক্ষিণ এশিয়ার ভূমি জরিপ, দলিল, খতিয়ান ও পর্চা বিশ্লেষক এআই সহকারী।\n\n📸 **উন্নত বাংলা OCR সুবিধা:** আপনি সরাসরি যেকোনো **খতিয়ান, পর্চা বা দলিলের ছবি অথবা PDF ফাইল** আপলোড করতে পারেন। আমি ছবির বাংলা লেখা ও সংখ্যা নিখুঁতভাবে **বাংলা OCR** করে পড়ে খতিয়ানের মোট জমি, দাগ নম্বর, মালিকদের নাম এবং প্রত্যেকের প্রাপ্ত শতাংশ ও কাঠার সঠিক হিসাব বাংলায় বুঝিয়ে দেব!\n\nএছাড়াও ভূমি আইন, নামজারি (খারিজ), হেবা বা বণ্টননামা সংক্রান্ত যেকোনো প্রশ্ন করতে পারেন:`
+          : `### Welcome! I am "Digital Amin" — Land & Khatian AI Assistant.\n\n📸 **Advanced Bangla OCR:** You can upload or drag & drop up to **3-4 photos or PDF files** of your Khatian, Porcha, or deeds. I will perform full Bangla OCR to extract the handwritten/printed text, plot numbers, total land, and compute each owner's exact share in Sotangso, Katha, and Sq.Ft in detailed Bengali!\n\nYou can also ask any questions about mutation (Namjari), deeds, or survey math:`,
       timestamp: Date.now(),
     },
   ]);
@@ -72,11 +72,13 @@ export const LandAiChat: React.FC<LandAiChatProps> = ({ lang, apiKey }) => {
   const attachmentSpecificPrompts =
     lang === 'BN'
       ? [
+          '📸 ছবি থেকে বাংলা OCR করে সম্পূর্ণ খতিয়ান ও হিস্যা বের করো',
           '📜 এই খতিয়ানের মোট জমি ও সবার হিস্যা হিসাব করে দাও',
           '🔍 খতিয়ানের দাগ নং, মৌজা ও অংশীদারদের শতক জমি বের করো',
           '⚖️ খতিয়ানের আনা বা দশমিক অংশ বিস্তারিত টেবিল আকারে দেখাও',
         ]
       : [
+          '📸 Perform Bangla OCR on this image and extract all details',
           '📜 Calculate total land and all partners’ shares from this Khatian',
           '🔍 Extract Khatian plot numbers, Mouza, and land in Sotangso',
           '⚖️ Break down ownership shares in a detailed Markdown table',
@@ -348,21 +350,18 @@ export const LandAiChat: React.FC<LandAiChatProps> = ({ lang, apiKey }) => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
+            <img
+              src="/app-icon.png"
+              alt="Digital Amin"
               style={{
                 width: '38px',
                 height: '38px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#FFFFFF',
+                objectFit: 'cover',
                 boxShadow: '0 4px 10px rgba(46, 125, 50, 0.35)',
+                border: '1.5px solid rgba(46, 125, 50, 0.3)',
               }}
-            >
-              <Bot size={22} />
-            </div>
+            />
             <div>
               <h2
                 style={{
@@ -542,21 +541,19 @@ export const LandAiChat: React.FC<LandAiChatProps> = ({ lang, apiKey }) => {
                 }}
               >
                 {!isUser && (
-                  <div
+                  <img
+                    src="/app-icon.png"
+                    alt="Digital Amin"
                     style={{
-                      width: '30px',
-                      height: '30px',
+                      width: '32px',
+                      height: '32px',
                       borderRadius: '50%',
-                      background: '#1B5E20',
-                      color: '#FFFFFF',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      objectFit: 'cover',
                       flexShrink: 0,
+                      border: '1.5px solid #2E7D32',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
                     }}
-                  >
-                    <Bot size={16} />
-                  </div>
+                  />
                 )}
 
                 <div

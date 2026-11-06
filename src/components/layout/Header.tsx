@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Compass,
   Settings,
   HelpCircle,
   User,
@@ -59,22 +58,18 @@ export const Header: React.FC<HeaderProps> = ({
     >
       {/* Brand & Identity */}
       <div className="header-brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div
+        <img
+          src="/app-icon.png"
+          alt="জমি পরিমাপ - Digital Amin Logo"
           style={{
             width: '44px',
             height: '44px',
             borderRadius: '14px',
-            background: 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#FFFFFF',
             boxShadow: '0 6px 14px rgba(46, 125, 50, 0.35)',
             border: '1.5px solid rgba(255, 255, 255, 0.4)',
+            objectFit: 'cover',
           }}
-        >
-          <Compass size={26} />
-        </div>
+        />
 
         <div>
           <h1
