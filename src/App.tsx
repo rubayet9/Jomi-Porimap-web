@@ -43,6 +43,7 @@ import { HistoryTab } from './components/history/HistoryTab';
 import { AboutDeveloperModal } from './components/modals/AboutDeveloperModal';
 import { SettingsModal } from './components/modals/SettingsModal';
 import { UserManualModal } from './components/modals/UserManualModal';
+import { WelcomeGuideModal } from './components/modals/WelcomeGuideModal';
 import { CalculationResultModal } from './components/modals/CalculationResultModal';
 import { SurveyCertificatePage, SurveyCertificateData } from './components/certificate/SurveyCertificatePage';
 import { AuthModal } from './components/auth/AuthModal';
@@ -141,6 +142,19 @@ export const App: React.FC = () => {
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isWelcomeGuideOpen, setIsWelcomeGuideOpen] = useState(false);
+
+  // Auto-trigger Welcome & Quick Setup Guide modal 2 seconds after entering the website
+  useEffect(() => {
+    const isGuideDisabled = localStorage.getItem('jomi_welcome_guide_disabled') === 'true';
+    if (isGuideDisabled) return;
+
+    const timer = setTimeout(() => {
+      setIsWelcomeGuideOpen(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Dedicated Full-Page A4 Certificate View
   const [isCertificatePageOpen, setIsCertificatePageOpen] = useState<boolean>(false);
@@ -1157,6 +1171,16 @@ export const App: React.FC = () => {
         isOpen={isManualOpen}
         onClose={() => setIsManualOpen(false)}
         lang={lang}
+      />
+
+      <WelcomeGuideModal
+        isOpen={isWelcomeGuideOpen}
+        onClose={() => setIsWelcomeGuideOpen(false)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        lang={lang}
+        sotangsoPerKatha={sotangsoPerKatha}
+        landPrice={landPrice}
+        priceUnit={priceUnit}
       />
 
       <AuthModal
