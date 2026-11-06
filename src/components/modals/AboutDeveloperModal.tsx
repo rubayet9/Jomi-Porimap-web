@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, Calendar, Flag, Globe, Mail, Heart } from 'lucide-react';
+import { X, User, Calendar, Flag, Mail, Heart } from 'lucide-react';
 import { AppLanguage } from '../../types';
 import { getTranslation } from '../../lib/translations';
 import { SkeuoCard } from '../skeuomorphic/SkeuoCard';
@@ -170,24 +170,6 @@ export const AboutDeveloperModal: React.FC<AboutDeveloperModalProps> = ({
             <div style={{ fontSize: '12px', fontWeight: 800, color: '#1B5E20' }}>
               Contact Details:
             </div>
-
-            <a
-              href="https://rubayetkhan.is-best.net"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontSize: '13px',
-                color: '#2E7D32',
-                textDecoration: 'none',
-                fontWeight: 700,
-              }}
-            >
-              <Globe size={16} />
-              <span>rubayetkhan.is-best.net</span>
-            </a>
 
             <a
               href="mailto:rubayetfivermail@gmail.com"
