@@ -108,7 +108,6 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
           style={{
             padding: '24px 22px',
             position: 'relative',
-            background: 'var(--surface-card, #1A221C)',
           }}
         >
           {/* Top Close Button */}
@@ -122,9 +121,9 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
               width: '32px',
               height: '32px',
               borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid var(--border-rim, rgba(255, 255, 255, 0.15))',
-              color: 'var(--text-muted, #94A3B8)',
+              background: 'var(--surface-plate)',
+              border: '1px solid var(--border-rim)',
+              color: 'var(--text-muted)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -184,7 +183,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
               style={{
                 fontSize: '20px',
                 fontWeight: 900,
-                color: 'var(--text-main, #FFFFFF)',
+                color: 'var(--text-main)',
                 margin: '4px 0 6px 0',
                 letterSpacing: '-0.3px',
               }}
@@ -194,7 +193,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
             <p
               style={{
                 fontSize: '13px',
-                color: 'var(--text-muted, #94A3B8)',
+                color: 'var(--text-muted)',
                 lineHeight: 1.5,
                 margin: 0,
                 padding: '0 8px',
@@ -215,8 +214,9 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                 gap: '12px',
                 padding: '14px',
                 borderRadius: '14px',
-                background: 'var(--surface-plate, rgba(255, 255, 255, 0.04))',
-                border: '1.5px solid rgba(16, 185, 129, 0.25)',
+                background: 'var(--surface-plate)',
+                border: '1.5px solid var(--border-rim)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
                 alignItems: 'flex-start',
               }}
             >
@@ -247,7 +247,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                     marginBottom: '4px',
                   }}
                 >
-                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-main, #FFFFFF)', margin: 0 }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
                     {lang === 'BN' ? '১. আপনার এলাকার কাঠা পরিমাপ' : '1. Regional Katha Ratio'}
                   </h4>
                   <span
@@ -255,7 +255,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                       fontSize: '11px',
                       fontWeight: 800,
                       background: 'rgba(16, 185, 129, 0.2)',
-                      color: '#10B981',
+                      color: '#059669',
                       padding: '2px 8px',
                       borderRadius: '6px',
                     }}
@@ -263,7 +263,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                     {lang === 'BN' ? `বর্তমান: ${fmtNum(sotangsoPerKatha)} শতক` : `Current: ${sotangsoPerKatha} Dec`}
                   </span>
                 </div>
-                <p style={{ fontSize: '12.5px', color: 'var(--text-muted, #94A3B8)', margin: 0, lineHeight: 1.5 }}>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
                   {lang === 'BN'
                     ? 'বাংলাদেশে অঞ্চলভেদে ১ কাঠার মান ভিন্ন হয় (যেমন: ১.৫, ১.৬৫, ২.০ বা ২.৭ শতাংশ)। সেটিংস থেকে আপনার এলাকার কাঠার মান সেট করুন।'
                     : 'Katha sizes vary by region in Bangladesh (e.g., 1.5, 1.65, 2.0, or 2.7 Decimals). Configure this from Settings.'}
@@ -278,8 +278,9 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                 gap: '12px',
                 padding: '14px',
                 borderRadius: '14px',
-                background: 'var(--surface-plate, rgba(255, 255, 255, 0.04))',
-                border: '1.5px solid rgba(245, 158, 11, 0.25)',
+                background: 'var(--surface-plate)',
+                border: '1.5px solid var(--border-rim)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
                 alignItems: 'flex-start',
               }}
             >
@@ -310,7 +311,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                     marginBottom: '4px',
                   }}
                 >
-                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-main, #FFFFFF)', margin: 0 }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
                     {lang === 'BN' ? '২. জমির দর ও বাজার মূল্য নির্ধারণ' : '2. Land Valuation & Rate'}
                   </h4>
                   <span
@@ -318,7 +319,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                       fontSize: '11px',
                       fontWeight: 800,
                       background: 'rgba(245, 158, 11, 0.2)',
-                      color: '#F59E0B',
+                      color: '#D97706',
                       padding: '2px 8px',
                       borderRadius: '6px',
                     }}
@@ -326,7 +327,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                     ৳ {fmtNum(landPrice)} / {priceUnitLabel}
                   </span>
                 </div>
-                <p style={{ fontSize: '12.5px', color: 'var(--text-muted, #94A3B8)', margin: 0, lineHeight: 1.5 }}>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
                   {lang === 'BN'
                     ? 'সেটিংস থেকে আপনার জমির শতক, কাঠা বা বিঘা প্রতি বিক্রয়/ক্রয় মূল্য নির্ধারণ করে রাখলে পরিমাপের সাথে সাথেই মোট টাকার পরিমাণ স্বয়ংক্রিয়ভাবে হিসাব হবে।'
                     : 'Set your land purchase/sale rate per Sotangso, Katha, or Bigha to automatically see total valuation with every calculation.'}
@@ -341,8 +342,9 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                 gap: '12px',
                 padding: '14px',
                 borderRadius: '14px',
-                background: 'var(--surface-plate, rgba(255, 255, 255, 0.04))',
-                border: '1.5px solid rgba(59, 130, 246, 0.25)',
+                background: 'var(--surface-plate)',
+                border: '1.5px solid var(--border-rim)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
                 alignItems: 'flex-start',
               }}
             >
@@ -363,10 +365,10 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                 <Compass size={18} />
               </div>
               <div style={{ flex: 1 }}>
-                <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-main, #FFFFFF)', margin: '0 0 4px 0' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 4px 0' }}>
                   {lang === 'BN' ? '৩. ত্রিভুজায়ন ও খতিয়ান ক্যালকুলেটর' : '3. Triangulation & Khatian OCR'}
                 </h4>
-                <p style={{ fontSize: '12.5px', color: 'var(--text-muted, #94A3B8)', margin: 0, lineHeight: 1.5 }}>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
                   {lang === 'BN'
                     ? 'আঁকাবাঁকা ৪ বাহুর জমির জন্য "ত্রিভুজায়ন" ট্যাব এবং খতিয়ান বণ্টন ও ছবি থেকে বাংলা OCR পাঠের জন্য "খতিয়ান" ও "এআই সহকারী" ব্যবহার করুন।'
                     : 'Use the "Triangulation" tab for irregular 4-sided plots and "Khatian" / "AI Assistant" for Bangla OCR document analysis.'}
@@ -383,11 +385,11 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                 onClick={handleGoToSettings}
                 style={{
                   flex: 1,
-                  minWidth: '200px',
+                  minWidth: '180px',
                   padding: '12px 18px',
                   borderRadius: '12px',
                   border: 'none',
-                  background: 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)',
+                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
                   color: '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 800,
@@ -396,7 +398,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  boxShadow: '0 4px 15px rgba(46, 125, 50, 0.4)',
+                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.35)',
                   transition: 'transform 0.15s ease',
                 }}
               >
@@ -408,23 +410,28 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
               <button
                 type="button"
                 onClick={handleClose}
+                className="welcome-guide-start-btn"
                 style={{
-                  padding: '12px 20px',
+                  padding: '12px 22px',
                   borderRadius: '12px',
-                  border: '1.5px solid var(--border-rim, rgba(255, 255, 255, 0.15))',
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  color: 'var(--text-main, #FFFFFF)',
-                  fontSize: '13.5px',
-                  fontWeight: 700,
+                  border: '2px solid #10B981',
+                  background: 'var(--surface-plate, #FFFFFF)',
+                  color: 'var(--text-main, #0E2417)',
+                  fontSize: '14px',
+                  fontWeight: 800,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
+                  gap: '8px',
+                  boxShadow: '0 3px 10px rgba(16, 185, 129, 0.18)',
+                  transition: 'all 0.15s ease',
                 }}
               >
-                <CheckCircle2 size={16} color="#10B981" />
-                <span>{lang === 'BN' ? 'ঠিক আছে, বুঝেছি' : 'Got it, Start'}</span>
+                <CheckCircle2 size={18} color="#10B981" />
+                <span style={{ color: 'var(--text-main, #0E2417)', fontWeight: 800 }}>
+                  {lang === 'BN' ? 'ঠিক আছে, বুঝেছি' : 'Got it, Start'}
+                </span>
               </button>
             </div>
 
@@ -440,9 +447,9 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                 gap: '8px',
                 padding: '10px 14px',
                 borderRadius: '12px',
-                background: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                color: '#10B981',
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1.5px solid #10B981',
+                color: 'var(--text-main, #0E2417)',
                 fontSize: '12.5px',
                 fontWeight: 800,
                 textDecoration: 'none',
@@ -461,7 +468,7 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
                 justifyContent: 'center',
                 gap: '8px',
                 fontSize: '12px',
-                color: 'var(--text-muted, #94A3B8)',
+                color: 'var(--text-muted)',
                 cursor: 'pointer',
                 marginTop: '6px',
                 userSelect: 'none',
