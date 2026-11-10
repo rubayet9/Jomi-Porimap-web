@@ -428,6 +428,31 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
               </button>
             </div>
 
+            {/* Direct Android APK Download Banner */}
+            <a
+              href="/Jomi-Porimap-v1.0.apk"
+              download="Jomi Porimap-v1.0.apk"
+              onClick={() => sound.playClick()}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '10px 14px',
+                borderRadius: '12px',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                color: '#10B981',
+                fontSize: '12.5px',
+                fontWeight: 800,
+                textDecoration: 'none',
+                marginTop: '4px',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <span>📱 {lang === 'BN' ? 'ফোনে অ্যান্ড্রয়েড অ্যাপ (APK) ইনস্টল করতে ক্লিক করুন' : 'Click here to download Android App (APK)'}</span>
+            </a>
+
             {/* Do not show again checkbox */}
             <label
               style={{
@@ -463,3 +488,4 @@ export const WelcomeGuideModal: React.FC<WelcomeGuideModalProps> = ({
     </div>
   );
 };
+

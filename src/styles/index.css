@@ -1402,3 +1402,65 @@ body {
   }
 }
 
+/* =========================================
+   APK DOWNLOAD BUTTONS (Header & Navbar)
+   ========================================= */
+
+.header-apk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF !important;
+  padding: 5px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.header-apk-btn:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 5px 15px rgba(16, 185, 129, 0.45);
+  background: linear-gradient(135deg, #34D399 0%, #047857 100%);
+  color: #FFFFFF !important;
+}
+
+.header-apk-btn:active {
+  transform: translateY(0);
+}
+
+.tab-apk-btn {
+  border: 1.5px dashed rgba(16, 185, 129, 0.45) !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+  color: #10B981 !important;
+}
+
+.tab-apk-btn:hover {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: #10B981 !important;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .header-apk-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .header-apk-btn span {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tab-apk-btn {
+    display: none !important;
+  }
+}
+

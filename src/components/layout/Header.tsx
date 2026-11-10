@@ -8,6 +8,8 @@ import {
   Volume2,
   VolumeX,
   Languages,
+  Download,
+  Smartphone,
 } from 'lucide-react';
 import { AppLanguage } from '../../types';
 import { getTranslation } from '../../lib/translations';
@@ -166,6 +168,19 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <HelpCircle size={17} />
         </button>
+
+        {/* Android APK Download Button */}
+        <a
+          href="/Jomi-Porimap-v1.0.apk"
+          download="Jomi Porimap-v1.0.apk"
+          onClick={() => sound.playClick()}
+          className="header-apk-btn"
+          title={lang === 'BN' ? 'অ্যান্ড্রয়েড অ্যাপ (APK) ডাউনলোড করুন' : 'Download Android App (APK)'}
+        >
+          <Smartphone size={14} />
+          <span>{lang === 'BN' ? 'অ্যাপ ডাউনলোড' : 'Download APK'}</span>
+          <Download size={13} />
+        </a>
 
         {/* Settings */}
         <button
