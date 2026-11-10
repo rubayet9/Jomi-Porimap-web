@@ -705,7 +705,7 @@ body {
   }
 
   .app-container {
-    padding: 10px 12px calc(80px + env(safe-area-inset-bottom, 16px)) 12px !important;
+    padding: 8px 10px calc(88px + env(safe-area-inset-bottom, 20px)) 10px !important;
   }
 
   /* Pinned Native Mobile App Bottom Navigation Bar */
@@ -929,22 +929,62 @@ body {
   }
 
   .header-actions {
-    padding: 4px 8px !important;
-    gap: 5px !important;
+    padding: 3px 6px !important;
+    gap: 4px !important;
     margin: 0 auto !important;
     justify-content: center !important;
     width: auto !important;
-    max-width: 100% !important;
+    max-width: 98vw !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
     box-sizing: border-box !important;
   }
 
+  .header-actions::-webkit-scrollbar {
+    display: none !important;
+  }
+
   .header-glass-btn {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
+    width: 29px !important;
+    height: 29px !important;
+    min-width: 29px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .header-lang-btn {
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 6px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+
+  .header-lang-btn span {
+    font-size: 10.5px !important;
+  }
+
+  .header-divider {
+    display: none !important;
+  }
+
+  .header-profile-name {
+    display: none !important;
+  }
+
+  .header-profile-btn {
+    padding: 2px !important;
+    gap: 0 !important;
+    border-radius: 50% !important;
+  }
+
+  .header-login-btn {
+    padding: 4px 7px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
   }
 
   /* Mobile Dialogs: Smooth Bottom-Sheet style like native Android APK */
@@ -1447,14 +1487,28 @@ body {
   transform: translateY(-1px);
 }
 
+.header-apk-label-desktop {
+  display: inline;
+}
+
+.header-apk-label-mobile {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .header-apk-btn {
-    padding: 4px 8px;
-    font-size: 11px;
-    gap: 4px;
+    padding: 3px 6px !important;
+    font-size: 10.5px !important;
+    gap: 3px !important;
+    border-radius: 8px !important;
   }
-  .header-apk-btn span {
-    font-size: 11px;
+  .header-apk-label-desktop {
+    display: none !important;
+  }
+  .header-apk-label-mobile {
+    display: inline !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
   }
 }
 

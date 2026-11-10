@@ -115,14 +115,14 @@ export const Header: React.FC<HeaderProps> = ({
             onLangChange(lang === 'BN' ? 'EN' : 'BN');
           }}
           title={lang === 'BN' ? 'ইংরেজি ভাষায় পরিবর্তন' : 'Switch to Bangla'}
-          className="header-glass-btn"
-          style={{ width: 'auto', padding: '0 10px', gap: '5px', fontWeight: 800, fontSize: '12.5px' }}
+          className="header-glass-btn header-lang-btn"
+          style={{ width: 'auto', padding: '0 9px', gap: '4px', fontWeight: 800, fontSize: '12px' }}
         >
-          <Languages size={15} />
+          <Languages size={14} />
           <span>{lang === 'BN' ? 'EN' : 'বাং'}</span>
         </button>
 
-        <div style={{ width: '1px', height: '20px', background: 'var(--border-rim)' }} />
+        <div className="header-divider" style={{ width: '1px', height: '18px', background: 'var(--border-rim)' }} />
 
         {/* Audio Toggle - Properly sized & glassy */}
         <button
@@ -136,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({
           title={soundEnabled ? (lang === 'BN' ? 'সাউন্ড বন্ধ করুন' : 'Mute Sounds') : (lang === 'BN' ? 'সাউন্ড চালু করুন' : 'Enable Sounds')}
           aria-label={soundEnabled ? 'Mute Sounds' : 'Enable Sounds'}
         >
-          {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
         </button>
 
         {/* Theme Toggle */}
@@ -150,10 +150,10 @@ export const Header: React.FC<HeaderProps> = ({
           title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           aria-label="Toggle Theme"
         >
-          {isDark ? <Sun size={17} /> : <Moon size={17} />}
+          {isDark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
-        <div style={{ width: '1px', height: '20px', background: 'var(--border-rim)' }} />
+        <div className="header-divider" style={{ width: '1px', height: '18px', background: 'var(--border-rim)' }} />
 
         {/* User Manual */}
         <button
@@ -166,7 +166,7 @@ export const Header: React.FC<HeaderProps> = ({
           title={getTranslation('user_manual', lang)}
           aria-label={getTranslation('user_manual', lang)}
         >
-          <HelpCircle size={17} />
+          <HelpCircle size={16} />
         </button>
 
         {/* Android APK Download Button */}
@@ -177,9 +177,10 @@ export const Header: React.FC<HeaderProps> = ({
           className="header-apk-btn"
           title={lang === 'BN' ? 'অ্যান্ড্রয়েড অ্যাপ (APK) ডাউনলোড করুন' : 'Download Android App (APK)'}
         >
-          <Smartphone size={14} />
-          <span>{lang === 'BN' ? 'অ্যাপ ডাউনলোড' : 'Download APK'}</span>
-          <Download size={13} />
+          <Smartphone size={13} />
+          <span className="header-apk-label-desktop">{lang === 'BN' ? 'অ্যাপ ডাউনলোড' : 'Download APK'}</span>
+          <span className="header-apk-label-mobile">APK</span>
+          <Download size={12} />
         </a>
 
         {/* Settings */}
@@ -202,6 +203,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             id="user-profile-btn"
+            className="header-profile-btn"
             onClick={() => {
               sound.playClick();
               onOpenProfile();
@@ -249,6 +251,7 @@ export const Header: React.FC<HeaderProps> = ({
               />
             </div>
             <span
+              className="header-profile-name"
               style={{
                 fontSize: '12px',
                 fontWeight: 800,
@@ -266,6 +269,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             id="user-login-btn"
+            className="header-login-btn"
             onClick={() => {
               sound.playClick();
               onOpenAuth();
@@ -288,7 +292,7 @@ export const Header: React.FC<HeaderProps> = ({
             }}
           >
             <User size={14} />
-            <span>{lang === 'BN' ? 'লগইন' : 'Login'}</span>
+            <span className="header-login-label">{lang === 'BN' ? 'লগইন' : 'Login'}</span>
           </button>
         )}
       </div>
